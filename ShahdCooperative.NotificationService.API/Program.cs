@@ -1,7 +1,9 @@
 using ShahdCooperative.NotificationService.API.BackgroundServices;
+using ShahdCooperative.NotificationService.Domain.Enums;
 using ShahdCooperative.NotificationService.Domain.Interfaces;
 using ShahdCooperative.NotificationService.Infrastructure.Configuration;
 using ShahdCooperative.NotificationService.Infrastructure.Repositories;
+using ShahdCooperative.NotificationService.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,8 +36,19 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(ShahdCooperative.NotificationService.Application.AssemblyReference).Assembly);
 });
 
+// Register notification senders (mock implementations for now)
+builder.Services.AddSingleton<INotificationSender>(sp =>
+    new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.Email));
+builder.Services.AddSingleton<INotificationSender>(sp =>
+    new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.SMS));
+builder.Services.AddSingleton<INotificationSender>(sp =>
+    new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.Push));
+builder.Services.AddSingleton<INotificationSender>(sp =>
+    new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.InApp));
+
 // Register background services
 builder.Services.AddHostedService<RabbitMQEventConsumer>();
+builder.Services.AddHostedService<NotificationQueueProcessor>();
 
 // Add controllers
 builder.Services.AddControllers();
