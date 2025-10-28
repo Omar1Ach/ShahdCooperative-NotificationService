@@ -13,6 +13,7 @@ public class TwilioSmsSender : INotificationSender
 {
     private readonly ILogger<TwilioSmsSender> _logger;
     private readonly SmsSettings _settings;
+    private readonly bool _isConfigured;
 
     public TwilioSmsSender(
         ILogger<TwilioSmsSender> logger,
@@ -24,10 +25,14 @@ public class TwilioSmsSender : INotificationSender
         if (string.IsNullOrWhiteSpace(_settings.TwilioAccountSid) ||
             string.IsNullOrWhiteSpace(_settings.TwilioAuthToken))
         {
-            throw new InvalidOperationException("Twilio credentials are not configured");
+            _logger.LogWarning("Twilio credentials are not configured. SMS sending will be disabled.");
+            _isConfigured = false;
         }
-
-        TwilioClient.Init(_settings.TwilioAccountSid, _settings.TwilioAuthToken);
+        else
+        {
+            TwilioClient.Init(_settings.TwilioAccountSid, _settings.TwilioAuthToken);
+            _isConfigured = true;
+        }
     }
 
     public NotificationType NotificationType => NotificationType.SMS;
@@ -40,6 +45,12 @@ public class TwilioSmsSender : INotificationSender
     {
         try
         {
+            if (!_isConfigured)
+            {
+                _logger.LogWarning("Twilio SMS sender is not configured. Cannot send SMS.");
+                return false;
+            }
+
             if (string.IsNullOrWhiteSpace(recipient))
             {
                 _logger.LogWarning("Recipient phone number is empty");

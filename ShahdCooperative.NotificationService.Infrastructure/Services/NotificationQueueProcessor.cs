@@ -15,20 +15,17 @@ public class NotificationQueueProcessor : BackgroundService
     private readonly NotificationSettings _settings;
     private readonly IServiceProvider _serviceProvider;
     private readonly IEnumerable<INotificationSender> _senders;
-    private readonly ITemplateEngine _templateEngine;
 
     public NotificationQueueProcessor(
         ILogger<NotificationQueueProcessor> logger,
         IOptions<NotificationSettings> settings,
         IServiceProvider serviceProvider,
-        IEnumerable<INotificationSender> senders,
-        ITemplateEngine templateEngine)
+        IEnumerable<INotificationSender> senders)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _senders = senders ?? throw new ArgumentNullException(nameof(senders));
-        _templateEngine = templateEngine ?? throw new ArgumentNullException(nameof(templateEngine));
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -57,6 +54,7 @@ public class NotificationQueueProcessor : BackgroundService
         using var scope = _serviceProvider.CreateScope();
         var queueRepository = scope.ServiceProvider.GetRequiredService<INotificationQueueRepository>();
         var logRepository = scope.ServiceProvider.GetRequiredService<INotificationLogRepository>();
+        var templateEngine = scope.ServiceProvider.GetRequiredService<ITemplateEngine>();
 
         var pendingNotifications = await queueRepository.GetPendingNotificationsAsync(
             _settings.BatchSize,
@@ -74,7 +72,7 @@ public class NotificationQueueProcessor : BackgroundService
 
         foreach (var notification in notifications)
         {
-            await ProcessNotificationAsync(notification, queueRepository, logRepository, cancellationToken);
+            await ProcessNotificationAsync(notification, queueRepository, logRepository, templateEngine, cancellationToken);
         }
     }
 
@@ -82,6 +80,7 @@ public class NotificationQueueProcessor : BackgroundService
         NotificationQueue notification,
         INotificationQueueRepository queueRepository,
         INotificationLogRepository logRepository,
+        ITemplateEngine templateEngine,
         CancellationToken cancellationToken)
     {
         try
@@ -102,7 +101,7 @@ public class NotificationQueueProcessor : BackgroundService
             var body = notification.Body;
             if (!string.IsNullOrWhiteSpace(notification.TemplateKey))
             {
-                body = await _templateEngine.ProcessTemplateAsync(
+                body = await templateEngine.ProcessTemplateAsync(
                     notification.TemplateKey,
                     notification.TemplateData ?? "{}",
                     cancellationToken);
