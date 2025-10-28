@@ -5,6 +5,7 @@ using ShahdCooperative.NotificationService.Infrastructure.Configuration;
 using ShahdCooperative.NotificationService.Infrastructure.Repositories;
 using ShahdCooperative.NotificationService.Infrastructure.Services;
 using ShahdCooperative.NotificationService.Infrastructure.Services.Email;
+using ShahdCooperative.NotificationService.Infrastructure.Services.Sms;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,9 +62,24 @@ else
         new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.Email));
 }
 
-// Register mock senders for SMS, Push, and InApp (will be implemented in later features)
-builder.Services.AddSingleton<INotificationSender>(sp =>
-    new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.SMS));
+// Register SMS sender based on provider
+var smsSettings = builder.Configuration.GetSection("SmsSettings").Get<SmsSettings>();
+if (smsSettings?.Provider?.ToLower() == "twilio")
+{
+    builder.Services.AddSingleton<INotificationSender, TwilioSmsSender>();
+}
+else if (smsSettings?.Provider?.ToLower() == "vonage")
+{
+    builder.Services.AddSingleton<INotificationSender, VonageSmsSender>();
+}
+else
+{
+    // Default to mock for SMS if not configured
+    builder.Services.AddSingleton<INotificationSender>(sp =>
+        new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.SMS));
+}
+
+// Register mock senders for Push and InApp (will be implemented in later features)
 builder.Services.AddSingleton<INotificationSender>(sp =>
     new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.Push));
 builder.Services.AddSingleton<INotificationSender>(sp =>
