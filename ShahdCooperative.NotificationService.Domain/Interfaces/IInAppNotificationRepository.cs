@@ -11,4 +11,5 @@ public interface IInAppNotificationRepository
     Task MarkAllAsReadAsync(Guid userId, CancellationToken cancellationToken = default);
     Task DeleteAsync(Guid notificationId, CancellationToken cancellationToken = default);
     Task<int> GetTotalCountAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<int> DeleteExpiredNotificationsAsync(DateTime currentTime, CancellationToken cancellationToken = default);
 }

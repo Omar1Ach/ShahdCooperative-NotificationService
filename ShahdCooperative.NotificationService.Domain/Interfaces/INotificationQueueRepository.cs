@@ -11,4 +11,6 @@ public interface INotificationQueueRepository
     Task IncrementAttemptAsync(Guid id, string? errorMessage, CancellationToken cancellationToken = default);
     Task SetNextRetryAsync(Guid id, DateTime nextRetryAt, CancellationToken cancellationToken = default);
     Task<NotificationQueue?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<NotificationQueue>> GetScheduledNotificationsAsync(DateTime currentTime, CancellationToken cancellationToken = default);
+    Task<IEnumerable<NotificationQueue>> GetFailedNotificationsForRetryAsync(DateTime currentTime, CancellationToken cancellationToken = default);
 }

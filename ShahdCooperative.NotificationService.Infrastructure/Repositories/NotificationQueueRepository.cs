@@ -111,4 +111,40 @@ public class NotificationQueueRepository : INotificationQueueRepository
         return await connection.QuerySingleOrDefaultAsync<NotificationQueue>(
             new CommandDefinition(sql, new { Id = id }, cancellationToken: cancellationToken));
     }
+
+    public async Task<IEnumerable<NotificationQueue>> GetScheduledNotificationsAsync(
+        DateTime currentTime, CancellationToken cancellationToken = default)
+    {
+        const string sql = @"
+            SELECT Id, NotificationType, Recipient, Subject, Body, TemplateKey, TemplateData,
+                   Priority, Status, AttemptCount, MaxRetries, NextRetryAt, ErrorMessage, CreatedAt, ProcessedAt
+            FROM Notification.NotificationQueue
+            WHERE Status = @ScheduledStatus
+              AND NextRetryAt <= @CurrentTime";
+
+        using var connection = new SqlConnection(_connectionString);
+        return await connection.QueryAsync<NotificationQueue>(
+            new CommandDefinition(sql,
+                new { ScheduledStatus = NotificationStatus.Scheduled, CurrentTime = currentTime },
+                cancellationToken: cancellationToken));
+    }
+
+    public async Task<IEnumerable<NotificationQueue>> GetFailedNotificationsForRetryAsync(
+        DateTime currentTime, CancellationToken cancellationToken = default)
+    {
+        const string sql = @"
+            SELECT Id, NotificationType, Recipient, Subject, Body, TemplateKey, TemplateData,
+                   Priority, Status, AttemptCount, MaxRetries, NextRetryAt, ErrorMessage, CreatedAt, ProcessedAt
+            FROM Notification.NotificationQueue
+            WHERE Status = @FailedStatus
+              AND AttemptCount < MaxRetries
+              AND NextRetryAt IS NOT NULL
+              AND NextRetryAt <= @CurrentTime";
+
+        using var connection = new SqlConnection(_connectionString);
+        return await connection.QueryAsync<NotificationQueue>(
+            new CommandDefinition(sql,
+                new { FailedStatus = NotificationStatus.Failed, CurrentTime = currentTime },
+                cancellationToken: cancellationToken));
+    }
 }

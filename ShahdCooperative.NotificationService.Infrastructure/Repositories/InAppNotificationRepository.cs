@@ -116,4 +116,16 @@ public class InAppNotificationRepository : IInAppNotificationRepository
         return await connection.ExecuteScalarAsync<int>(
             new CommandDefinition(sql, new { UserId = userId }, cancellationToken: cancellationToken));
     }
+
+    public async Task<int> DeleteExpiredNotificationsAsync(DateTime currentTime, CancellationToken cancellationToken = default)
+    {
+        const string sql = @"
+            DELETE FROM Notification.InAppNotifications
+            WHERE ExpiresAt IS NOT NULL
+              AND ExpiresAt <= @CurrentTime";
+
+        using var connection = new SqlConnection(_connectionString);
+        return await connection.ExecuteAsync(
+            new CommandDefinition(sql, new { CurrentTime = currentTime }, cancellationToken: cancellationToken));
+    }
 }

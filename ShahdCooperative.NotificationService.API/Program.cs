@@ -1,8 +1,11 @@
+using Hangfire;
+using Hangfire.SqlServer;
 using ShahdCooperative.NotificationService.API.BackgroundServices;
 using ShahdCooperative.NotificationService.API.Hubs;
 using ShahdCooperative.NotificationService.Domain.Enums;
 using ShahdCooperative.NotificationService.Domain.Interfaces;
 using ShahdCooperative.NotificationService.Infrastructure.Configuration;
+using ShahdCooperative.NotificationService.Infrastructure.Jobs;
 using ShahdCooperative.NotificationService.Infrastructure.Repositories;
 using ShahdCooperative.NotificationService.Infrastructure.Services;
 using ShahdCooperative.NotificationService.Infrastructure.Services.Email;
@@ -109,6 +112,25 @@ builder.Services.AddSingleton<INotificationHubClient>(sp =>
 // Register In-App notification sender with SignalR
 builder.Services.AddSingleton<INotificationSender, InAppNotificationSender>();
 
+// Register Hangfire jobs
+builder.Services.AddScoped<ScheduledNotificationJob>();
+
+// Add Hangfire
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(connectionString, new SqlServerStorageOptions
+    {
+        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+        QueuePollInterval = TimeSpan.Zero,
+        UseRecommendedIsolationLevel = true,
+        DisableGlobalLocks = true
+    }));
+
+builder.Services.AddHangfireServer();
+
 // Register background services
 builder.Services.AddHostedService<RabbitMQEventConsumer>();
 builder.Services.AddHostedService<NotificationQueueProcessor>();
@@ -144,6 +166,26 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseAuthorization();
+
+// Use Hangfire Dashboard
+app.UseHangfireDashboard("/hangfire");
+
+// Configure recurring jobs
+RecurringJob.AddOrUpdate<ScheduledNotificationJob>(
+    "process-scheduled-notifications",
+    job => job.ProcessScheduledNotificationsAsync(),
+    "*/5 * * * *"); // Every 5 minutes
+
+RecurringJob.AddOrUpdate<ScheduledNotificationJob>(
+    "cleanup-expired-notifications",
+    job => job.CleanupExpiredNotificationsAsync(),
+    Cron.Daily(2)); // Daily at 2 AM UTC
+
+RecurringJob.AddOrUpdate<ScheduledNotificationJob>(
+    "retry-failed-notifications",
+    job => job.RetryFailedNotificationsAsync(),
+    Cron.Hourly()); // Every hour
+
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
 
