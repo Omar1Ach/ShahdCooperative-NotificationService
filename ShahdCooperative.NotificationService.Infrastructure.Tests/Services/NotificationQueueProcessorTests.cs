@@ -46,6 +46,7 @@ public class NotificationQueueProcessorTests
         var services = new ServiceCollection();
         services.AddScoped(_ => _mockQueueRepository.Object);
         services.AddScoped(_ => _mockLogRepository.Object);
+        services.AddScoped(_ => _mockTemplateEngine.Object);
         _serviceProvider = services.BuildServiceProvider();
     }
 
@@ -56,8 +57,7 @@ public class NotificationQueueProcessorTests
             null!,
             Options.Create(_settings),
             _serviceProvider,
-            new[] { _mockSender.Object },
-            _mockTemplateEngine.Object);
+            new[] { _mockSender.Object });
 
         act.Should().Throw<ArgumentNullException>();
     }
@@ -69,8 +69,7 @@ public class NotificationQueueProcessorTests
             _mockLogger.Object,
             null!,
             _serviceProvider,
-            new[] { _mockSender.Object },
-            _mockTemplateEngine.Object);
+            new[] { _mockSender.Object });
 
         act.Should().Throw<ArgumentNullException>();
     }
@@ -82,8 +81,7 @@ public class NotificationQueueProcessorTests
             _mockLogger.Object,
             Options.Create(_settings),
             null!,
-            new[] { _mockSender.Object },
-            _mockTemplateEngine.Object);
+            new[] { _mockSender.Object });
 
         act.Should().Throw<ArgumentNullException>();
     }
@@ -95,8 +93,7 @@ public class NotificationQueueProcessorTests
             _mockLogger.Object,
             Options.Create(_settings),
             _serviceProvider,
-            null!,
-            _mockTemplateEngine.Object);
+            null!);
 
         act.Should().Throw<ArgumentNullException>();
     }
@@ -112,8 +109,7 @@ public class NotificationQueueProcessorTests
             _mockLogger.Object,
             Options.Create(_settings),
             _serviceProvider,
-            new[] { _mockSender.Object },
-            _mockTemplateEngine.Object);
+            new[] { _mockSender.Object });
 
         // We can't directly test ProcessPendingNotificationsAsync as it's private,
         // but we can verify that GetPendingNotificationsAsync was called
@@ -163,8 +159,7 @@ public class NotificationQueueProcessorTests
             _mockLogger.Object,
             Options.Create(_settings),
             _serviceProvider,
-            new[] { _mockSender.Object },
-            _mockTemplateEngine.Object);
+            new[] { _mockSender.Object });
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
 
@@ -226,8 +221,7 @@ public class NotificationQueueProcessorTests
             _mockLogger.Object,
             Options.Create(_settings),
             _serviceProvider,
-            new[] { _mockSender.Object },
-            _mockTemplateEngine.Object);
+            new[] { _mockSender.Object });
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
 
@@ -274,8 +268,7 @@ public class NotificationQueueProcessorTests
             _mockLogger.Object,
             Options.Create(_settings),
             _serviceProvider,
-            new[] { _mockSender.Object },
-            _mockTemplateEngine.Object); // Only Email sender
+            new[] { _mockSender.Object }); // Only Email sender
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
 
