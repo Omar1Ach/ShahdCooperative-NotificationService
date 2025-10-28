@@ -6,6 +6,7 @@ using ShahdCooperative.NotificationService.Infrastructure.Repositories;
 using ShahdCooperative.NotificationService.Infrastructure.Services;
 using ShahdCooperative.NotificationService.Infrastructure.Services.Email;
 using ShahdCooperative.NotificationService.Infrastructure.Services.Sms;
+using ShahdCooperative.NotificationService.Infrastructure.Services.Push;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -79,9 +80,21 @@ else
         new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.SMS));
 }
 
-// Register mock senders for Push and InApp (will be implemented in later features)
-builder.Services.AddSingleton<INotificationSender>(sp =>
-    new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.Push));
+// Register Push notification sender based on configuration
+var pushSettings = builder.Configuration.GetSection("PushNotificationSettings").Get<PushNotificationSettings>();
+if (!string.IsNullOrWhiteSpace(pushSettings?.FirebaseCredentialsPath) &&
+    File.Exists(pushSettings.FirebaseCredentialsPath))
+{
+    builder.Services.AddSingleton<INotificationSender, FirebasePushNotificationSender>();
+}
+else
+{
+    // Default to mock for Push if not configured
+    builder.Services.AddSingleton<INotificationSender>(sp =>
+        new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.Push));
+}
+
+// Register mock sender for InApp (will be implemented in later feature)
 builder.Services.AddSingleton<INotificationSender>(sp =>
     new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.InApp));
 
