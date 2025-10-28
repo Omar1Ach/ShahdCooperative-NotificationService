@@ -4,6 +4,7 @@ using ShahdCooperative.NotificationService.Domain.Interfaces;
 using ShahdCooperative.NotificationService.Infrastructure.Configuration;
 using ShahdCooperative.NotificationService.Infrastructure.Repositories;
 using ShahdCooperative.NotificationService.Infrastructure.Services;
+using ShahdCooperative.NotificationService.Infrastructure.Services.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,9 +37,28 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(ShahdCooperative.NotificationService.Application.AssemblyReference).Assembly);
 });
 
-// Register notification senders (mock implementations for now)
-builder.Services.AddSingleton<INotificationSender>(sp =>
-    new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.Email));
+// Register email sender based on provider
+var emailSettings = builder.Configuration.GetSection("EmailSettings").Get<EmailSettings>();
+if (emailSettings?.Provider?.ToLower() == "sendgrid")
+{
+    builder.Services.AddSingleton<INotificationSender, SendGridEmailSender>();
+}
+else if (emailSettings?.Provider?.ToLower() == "awsses")
+{
+    builder.Services.AddSingleton<INotificationSender, AwsSesEmailSender>();
+}
+else if (emailSettings?.Provider?.ToLower() == "smtp")
+{
+    builder.Services.AddSingleton<INotificationSender, SmtpEmailSender>();
+}
+else
+{
+    // Default to mock for email if not configured
+    builder.Services.AddSingleton<INotificationSender>(sp =>
+        new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.Email));
+}
+
+// Register mock senders for SMS, Push, and InApp (will be implemented in later features)
 builder.Services.AddSingleton<INotificationSender>(sp =>
     new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.SMS));
 builder.Services.AddSingleton<INotificationSender>(sp =>
