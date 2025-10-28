@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: shahdcooperative-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourStrong!Passw0rd
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - shahdcooperative-network
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong!Passw0rd -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: shahdcooperative-rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - shahdcooperative-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  notification-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: shahdcooperative-notification-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ShahdCooperative;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+      - RabbitMQ__VirtualHost=/
+      - RabbitMQ__Exchange=shahdcooperative.events
+      - RabbitMQ__ExchangeType=topic
+      - RabbitMQ__QueueName=notification-service-queue
+      - RabbitMQ__PrefetchCount=10
+      - RabbitMQ__AutomaticRecoveryEnabled=true
+      - RabbitMQ__NetworkRecoveryInterval=5
+      - NotificationSettings__MaxRetries=3
+      - NotificationSettings__RetryDelayMinutes=5
+      - NotificationSettings__BatchSize=50
+      - NotificationSettings__ProcessingIntervalSeconds=30
+    ports:
+      - "5093:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - shahdcooperative-network
+    restart: unless-stopped
+
+networks:
+  shahdcooperative-network:
+    driver: bridge
+
+volumes:
+  sqlserver_data:
+  rabbitmq_data:
