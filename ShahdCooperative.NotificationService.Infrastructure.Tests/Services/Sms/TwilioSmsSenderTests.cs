@@ -43,7 +43,7 @@ public class TwilioSmsSenderTests
     }
 
     [Fact]
-    public void Constructor_Should_Throw_When_AccountSid_Is_Empty()
+    public void Constructor_Should_Not_Throw_When_AccountSid_Is_Empty()
     {
         var invalidSettings = new SmsSettings
         {
@@ -54,12 +54,11 @@ public class TwilioSmsSenderTests
 
         var act = () => new TwilioSmsSender(_mockLogger.Object, Options.Create(invalidSettings));
 
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("Twilio credentials are not configured");
+        act.Should().NotThrow();
     }
 
     [Fact]
-    public void Constructor_Should_Throw_When_AuthToken_Is_Empty()
+    public void Constructor_Should_Not_Throw_When_AuthToken_Is_Empty()
     {
         var invalidSettings = new SmsSettings
         {
@@ -70,8 +69,7 @@ public class TwilioSmsSenderTests
 
         var act = () => new TwilioSmsSender(_mockLogger.Object, Options.Create(invalidSettings));
 
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("Twilio credentials are not configured");
+        act.Should().NotThrow();
     }
 
     [Fact]
@@ -118,6 +116,23 @@ public class TwilioSmsSenderTests
         var sender = new TwilioSmsSender(_mockLogger.Object, Options.Create(_settings));
 
         var result = await sender.SendAsync("+1234567890", "Subject", "   ");
+
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task SendAsync_Should_Return_False_When_Credentials_Not_Configured()
+    {
+        var invalidSettings = new SmsSettings
+        {
+            TwilioAccountSid = "",
+            TwilioAuthToken = "",
+            TwilioPhoneNumber = "+1234567890"
+        };
+
+        var sender = new TwilioSmsSender(_mockLogger.Object, Options.Create(invalidSettings));
+
+        var result = await sender.SendAsync("+1234567890", "Subject", "Test message");
 
         result.Should().BeFalse();
     }
