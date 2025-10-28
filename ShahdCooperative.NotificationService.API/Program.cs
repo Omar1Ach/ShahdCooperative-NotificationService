@@ -1,4 +1,5 @@
 using ShahdCooperative.NotificationService.API.BackgroundServices;
+using ShahdCooperative.NotificationService.API.Hubs;
 using ShahdCooperative.NotificationService.Domain.Enums;
 using ShahdCooperative.NotificationService.Domain.Interfaces;
 using ShahdCooperative.NotificationService.Infrastructure.Configuration;
@@ -7,6 +8,7 @@ using ShahdCooperative.NotificationService.Infrastructure.Services;
 using ShahdCooperative.NotificationService.Infrastructure.Services.Email;
 using ShahdCooperative.NotificationService.Infrastructure.Services.Sms;
 using ShahdCooperative.NotificationService.Infrastructure.Services.Push;
+using ShahdCooperative.NotificationService.Infrastructure.Services.InApp;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -94,9 +96,18 @@ else
         new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.Push));
 }
 
-// Register mock sender for InApp (will be implemented in later feature)
-builder.Services.AddSingleton<INotificationSender>(sp =>
-    new MockNotificationSender(sp.GetRequiredService<ILogger<MockNotificationSender>>(), NotificationType.InApp));
+// Add SignalR
+builder.Services.AddSignalR();
+
+// Register SignalR hub client wrapper
+builder.Services.AddSingleton<INotificationHubClient>(sp =>
+{
+    var hubContext = sp.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<NotificationHub>>();
+    return new NotificationHubClient(hubContext);
+});
+
+// Register In-App notification sender with SignalR
+builder.Services.AddSingleton<INotificationSender, InAppNotificationSender>();
 
 // Register background services
 builder.Services.AddHostedService<RabbitMQEventConsumer>();
@@ -109,14 +120,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add CORS
+// Add CORS (configured for SignalR)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.SetIsOriginAllowed(_ => true)
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
@@ -133,5 +145,6 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();
