@@ -37,6 +37,9 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(ShahdCooperative.NotificationService.Application.AssemblyReference).Assembly);
 });
 
+// Register template engine
+builder.Services.AddScoped<ITemplateEngine, TemplateEngine>();
+
 // Register email sender based on provider
 var emailSettings = builder.Configuration.GetSection("EmailSettings").Get<EmailSettings>();
 if (emailSettings?.Provider?.ToLower() == "sendgrid")

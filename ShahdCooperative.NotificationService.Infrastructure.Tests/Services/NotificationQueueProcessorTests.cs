@@ -18,6 +18,7 @@ public class NotificationQueueProcessorTests
     private readonly Mock<INotificationQueueRepository> _mockQueueRepository;
     private readonly Mock<INotificationLogRepository> _mockLogRepository;
     private readonly Mock<INotificationSender> _mockSender;
+    private readonly Mock<ITemplateEngine> _mockTemplateEngine;
     private readonly NotificationSettings _settings;
     private readonly ServiceProvider _serviceProvider;
 
@@ -27,6 +28,7 @@ public class NotificationQueueProcessorTests
         _mockQueueRepository = new Mock<INotificationQueueRepository>();
         _mockLogRepository = new Mock<INotificationLogRepository>();
         _mockSender = new Mock<INotificationSender>();
+        _mockTemplateEngine = new Mock<ITemplateEngine>();
 
         _settings = new NotificationSettings
         {
@@ -37,6 +39,9 @@ public class NotificationQueueProcessorTests
         };
 
         _mockSender.Setup(s => s.NotificationType).Returns(NotificationType.Email);
+        _mockTemplateEngine.Setup(t => t.ProcessTemplateAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync("Processed template body");
 
         var services = new ServiceCollection();
         services.AddScoped(_ => _mockQueueRepository.Object);
@@ -51,7 +56,8 @@ public class NotificationQueueProcessorTests
             null!,
             Options.Create(_settings),
             _serviceProvider,
-            new[] { _mockSender.Object });
+            new[] { _mockSender.Object },
+            _mockTemplateEngine.Object);
 
         act.Should().Throw<ArgumentNullException>();
     }
@@ -63,7 +69,8 @@ public class NotificationQueueProcessorTests
             _mockLogger.Object,
             null!,
             _serviceProvider,
-            new[] { _mockSender.Object });
+            new[] { _mockSender.Object },
+            _mockTemplateEngine.Object);
 
         act.Should().Throw<ArgumentNullException>();
     }
@@ -75,7 +82,8 @@ public class NotificationQueueProcessorTests
             _mockLogger.Object,
             Options.Create(_settings),
             null!,
-            new[] { _mockSender.Object });
+            new[] { _mockSender.Object },
+            _mockTemplateEngine.Object);
 
         act.Should().Throw<ArgumentNullException>();
     }
@@ -87,7 +95,8 @@ public class NotificationQueueProcessorTests
             _mockLogger.Object,
             Options.Create(_settings),
             _serviceProvider,
-            null!);
+            null!,
+            _mockTemplateEngine.Object);
 
         act.Should().Throw<ArgumentNullException>();
     }
@@ -103,7 +112,8 @@ public class NotificationQueueProcessorTests
             _mockLogger.Object,
             Options.Create(_settings),
             _serviceProvider,
-            new[] { _mockSender.Object });
+            new[] { _mockSender.Object },
+            _mockTemplateEngine.Object);
 
         // We can't directly test ProcessPendingNotificationsAsync as it's private,
         // but we can verify that GetPendingNotificationsAsync was called
@@ -153,7 +163,8 @@ public class NotificationQueueProcessorTests
             _mockLogger.Object,
             Options.Create(_settings),
             _serviceProvider,
-            new[] { _mockSender.Object });
+            new[] { _mockSender.Object },
+            _mockTemplateEngine.Object);
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
 
@@ -215,7 +226,8 @@ public class NotificationQueueProcessorTests
             _mockLogger.Object,
             Options.Create(_settings),
             _serviceProvider,
-            new[] { _mockSender.Object });
+            new[] { _mockSender.Object },
+            _mockTemplateEngine.Object);
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
 
@@ -262,7 +274,8 @@ public class NotificationQueueProcessorTests
             _mockLogger.Object,
             Options.Create(_settings),
             _serviceProvider,
-            new[] { _mockSender.Object }); // Only Email sender
+            new[] { _mockSender.Object },
+            _mockTemplateEngine.Object); // Only Email sender
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
 

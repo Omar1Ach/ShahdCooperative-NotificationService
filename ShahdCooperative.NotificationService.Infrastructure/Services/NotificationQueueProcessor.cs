@@ -15,17 +15,20 @@ public class NotificationQueueProcessor : BackgroundService
     private readonly NotificationSettings _settings;
     private readonly IServiceProvider _serviceProvider;
     private readonly IEnumerable<INotificationSender> _senders;
+    private readonly ITemplateEngine _templateEngine;
 
     public NotificationQueueProcessor(
         ILogger<NotificationQueueProcessor> logger,
         IOptions<NotificationSettings> settings,
         IServiceProvider serviceProvider,
-        IEnumerable<INotificationSender> senders)
+        IEnumerable<INotificationSender> senders,
+        ITemplateEngine templateEngine)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _senders = senders ?? throw new ArgumentNullException(nameof(senders));
+        _templateEngine = templateEngine ?? throw new ArgumentNullException(nameof(templateEngine));
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -95,10 +98,27 @@ public class NotificationQueueProcessor : BackgroundService
                 return;
             }
 
+            // Process template if TemplateKey is provided
+            var body = notification.Body;
+            if (!string.IsNullOrWhiteSpace(notification.TemplateKey))
+            {
+                body = await _templateEngine.ProcessTemplateAsync(
+                    notification.TemplateKey,
+                    notification.TemplateData ?? "{}",
+                    cancellationToken);
+
+                if (string.IsNullOrEmpty(body))
+                {
+                    _logger.LogWarning("Template processing failed for notification {Id} with template key {TemplateKey}",
+                        notification.Id, notification.TemplateKey);
+                    body = notification.Body; // Fallback to original body
+                }
+            }
+
             var success = await sender.SendAsync(
                 notification.Recipient,
                 notification.Subject ?? string.Empty,
-                notification.Body,
+                body,
                 cancellationToken);
 
             if (success)
