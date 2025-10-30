@@ -3,6 +3,7 @@ using FluentAssertions;
 
 namespace ShahdCooperative.NotificationService.IntegrationTests.Controllers;
 
+[Collection("Sequential")]
 public class HealthControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory>, IAsyncLifetime
 {
     private readonly HttpClient _client;

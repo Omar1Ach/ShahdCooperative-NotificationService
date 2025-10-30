@@ -69,11 +69,20 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();
 
-        // Create schema
+        // Create schema first
         await using var schemaCommand = connection.CreateCommand();
         schemaCommand.CommandText = "IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'Notification') EXEC('CREATE SCHEMA Notification')";
         await schemaCommand.ExecuteNonQueryAsync();
 
+        // Create all tables before cleaning
+        await CreateTablesAsync(connection);
+
+        // Clean all tables (for test isolation)
+        await CleanDatabaseTablesAsync(connection);
+    }
+
+    private async Task CreateTablesAsync(SqlConnection connection)
+    {
         // Create NotificationTemplates table
         await using var templatesCommand = connection.CreateCommand();
         templatesCommand.CommandText = @"
@@ -104,15 +113,16 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                     [Recipient] NVARCHAR(500) NOT NULL,
                     [Subject] NVARCHAR(500),
                     [Body] NVARCHAR(MAX) NOT NULL,
-                    [Priority] INT NOT NULL DEFAULT 0,
+                    [TemplateKey] NVARCHAR(100),
+                    [TemplateData] NVARCHAR(MAX),
+                    [Priority] INT NOT NULL DEFAULT 5,
                     [Status] NVARCHAR(50) NOT NULL DEFAULT 'Pending',
-                    [RetryCount] INT NOT NULL DEFAULT 0,
+                    [AttemptCount] INT NOT NULL DEFAULT 0,
                     [MaxRetries] INT NOT NULL DEFAULT 3,
-                    [ScheduledFor] DATETIME2,
+                    [NextRetryAt] DATETIME2,
                     [ProcessedAt] DATETIME2,
                     [ErrorMessage] NVARCHAR(MAX),
-                    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-                    [UpdatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE()
+                    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE()
                 )
             END";
         await queueCommand.ExecuteNonQueryAsync();
@@ -173,6 +183,32 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 )
             END";
         await logsCommand.ExecuteNonQueryAsync();
+    }
+
+    private async Task CleanDatabaseTablesAsync(SqlConnection connection)
+    {
+        var tables = new[]
+        {
+            "[Notification].[NotificationLogs]",
+            "[Notification].[InAppNotifications]",
+            "[Notification].[NotificationQueue]",
+            "[Notification].[NotificationPreferences]",
+            "[Notification].[NotificationTemplates]"
+        };
+
+        foreach (var table in tables)
+        {
+            try
+            {
+                await using var command = connection.CreateCommand();
+                command.CommandText = $"IF OBJECT_ID('{table}', 'U') IS NOT NULL DELETE FROM {table}";
+                await command.ExecuteNonQueryAsync();
+            }
+            catch
+            {
+                // Table might not exist yet, ignore
+            }
+        }
     }
 
     public async Task CleanupDatabaseAsync()

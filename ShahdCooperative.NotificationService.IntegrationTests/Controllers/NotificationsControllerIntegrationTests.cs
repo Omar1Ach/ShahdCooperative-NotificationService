@@ -6,6 +6,7 @@ using ShahdCooperative.NotificationService.Domain.Enums;
 
 namespace ShahdCooperative.NotificationService.IntegrationTests.Controllers;
 
+[Collection("Sequential")]
 public class NotificationsControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory>, IAsyncLifetime
 {
     private readonly HttpClient _client;
