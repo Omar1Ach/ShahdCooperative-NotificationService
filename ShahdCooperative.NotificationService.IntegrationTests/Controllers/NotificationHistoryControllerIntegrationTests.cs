@@ -36,17 +36,21 @@ public class NotificationHistoryControllerIntegrationTests : IClassFixture<Custo
         await using var command = connection.CreateCommand();
         command.CommandText = @"
             INSERT INTO [Notification].[NotificationLogs]
-            (Id, NotificationType, Recipient, Subject, Body, Status, SentAt, CreatedAt)
-            VALUES (@Id, @NotificationType, @Recipient, @Subject, @Body, @Status, @SentAt, @CreatedAt)";
+            (Id, UserId, RecipientEmail, Type, Subject, Message, Status, SentAt, RetryCount, CreatedAt, UpdatedAt, IsDeleted)
+            VALUES (@Id, @UserId, @RecipientEmail, @Type, @Subject, @Message, @Status, @SentAt, @RetryCount, @CreatedAt, @UpdatedAt, @IsDeleted)";
 
         command.Parameters.AddWithValue("@Id", Guid.NewGuid());
-        command.Parameters.AddWithValue("@NotificationType", notificationType);
-        command.Parameters.AddWithValue("@Recipient", recipient);
+        command.Parameters.AddWithValue("@UserId", Guid.Parse("00000000-0000-0000-0000-000000000001"));
+        command.Parameters.AddWithValue("@RecipientEmail", recipient);
+        command.Parameters.AddWithValue("@Type", notificationType);
         command.Parameters.AddWithValue("@Subject", "Test Subject");
-        command.Parameters.AddWithValue("@Body", "Test Body");
+        command.Parameters.AddWithValue("@Message", "Test Body");
         command.Parameters.AddWithValue("@Status", status);
         command.Parameters.AddWithValue("@SentAt", DateTime.UtcNow);
+        command.Parameters.AddWithValue("@RetryCount", 0);
         command.Parameters.AddWithValue("@CreatedAt", DateTime.UtcNow);
+        command.Parameters.AddWithValue("@UpdatedAt", DateTime.UtcNow);
+        command.Parameters.AddWithValue("@IsDeleted", false);
 
         await command.ExecuteNonQueryAsync();
     }

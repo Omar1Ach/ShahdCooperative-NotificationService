@@ -56,7 +56,7 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
     public async Task GetUserNotifications_WithNoNotifications_ReturnsEmptyList()
     {
         // Arrange
-        var userId = Guid.NewGuid();
+        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
         // Act
         var response = await _client.GetAsync($"/api/inappnotifications/user/{userId}");
@@ -72,7 +72,7 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
     public async Task GetUserNotifications_WithExistingNotifications_ReturnsNotifications()
     {
         // Arrange
-        var userId = Guid.NewGuid();
+        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
         await CreateInAppNotificationAsync(userId, "Test Notification 1", "Message 1");
         await CreateInAppNotificationAsync(userId, "Test Notification 2", "Message 2");
 
@@ -90,7 +90,7 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
     public async Task GetUserNotifications_WithPagination_ReturnsPagedResults()
     {
         // Arrange
-        var userId = Guid.NewGuid();
+        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
         for (int i = 1; i <= 25; i++)
         {
             await CreateInAppNotificationAsync(userId, $"Notification {i}", $"Message {i}");
@@ -110,7 +110,7 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
     public async Task GetUnreadCount_WithNoUnreadNotifications_ReturnsZero()
     {
         // Arrange
-        var userId = Guid.NewGuid();
+        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
         await CreateInAppNotificationAsync(userId, "Read Notification", "Message", isRead: true);
 
         // Act
@@ -127,7 +127,7 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
     public async Task GetUnreadCount_WithUnreadNotifications_ReturnsCorrectCount()
     {
         // Arrange
-        var userId = Guid.NewGuid();
+        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
         await CreateInAppNotificationAsync(userId, "Unread 1", "Message 1", isRead: false);
         await CreateInAppNotificationAsync(userId, "Unread 2", "Message 2", isRead: false);
         await CreateInAppNotificationAsync(userId, "Read 1", "Message 3", isRead: true);
@@ -146,7 +146,7 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
     public async Task MarkAsRead_WithExistingNotification_ReturnsNoContent()
     {
         // Arrange
-        var userId = Guid.NewGuid();
+        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
         var notificationId = await CreateInAppNotificationAsync(userId, "Test", "Message", isRead: false);
 
         // Act
@@ -173,7 +173,7 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
     public async Task MarkAllAsRead_WithExistingNotifications_ReturnsNoContent()
     {
         // Arrange
-        var userId = Guid.NewGuid();
+        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
         await CreateInAppNotificationAsync(userId, "Unread 1", "Message 1", isRead: false);
         await CreateInAppNotificationAsync(userId, "Unread 2", "Message 2", isRead: false);
 
@@ -188,7 +188,7 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
     public async Task MarkAllAsRead_WithNoNotifications_ReturnsNotFound()
     {
         // Arrange
-        var userId = Guid.NewGuid();
+        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
         // Act
         var response = await _client.PutAsync($"/api/inappnotifications/user/{userId}/mark-all-read", null);

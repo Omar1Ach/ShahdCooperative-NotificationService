@@ -32,7 +32,7 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
     public async Task GetUserPreferences_WithNonExistingUser_ReturnsNotFound()
     {
         // Arrange
-        var userId = Guid.NewGuid();
+        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
         // Act
         var response = await _client.GetAsync($"/api/userpreferences/{userId}");
@@ -44,8 +44,8 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
     [Fact]
     public async Task CreateUserPreferences_WithValidData_ReturnsCreated()
     {
-        // Arrange
-        var userId = Guid.NewGuid();
+        // Arrange - Use predefined test user ID
+        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
         var command = new CreateUserPreferenceCommand
         {
             UserId = userId,
@@ -66,8 +66,8 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
     [Fact]
     public async Task GetUserPreferences_WithExistingUser_ReturnsPreferences()
     {
-        // Arrange - Create preferences first
-        var userId = Guid.NewGuid();
+        // Arrange - Create preferences first with predefined test user ID
+        var userId = Guid.Parse("00000000-0000-0000-0000-000000000002");
         var createCommand = new CreateUserPreferenceCommand
         {
             UserId = userId,
@@ -96,7 +96,7 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
     public async Task UpdateUserPreferences_WithValidData_ReturnsNoContent()
     {
         // Arrange - Create preferences first
-        var userId = Guid.NewGuid();
+        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
         var createCommand = new CreateUserPreferenceCommand
         {
             UserId = userId,
@@ -157,7 +157,7 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
     public async Task UpdateUserPreferences_WithNonExistingUser_ReturnsNotFound()
     {
         // Arrange
-        var userId = Guid.NewGuid();
+        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
         var updateCommand = new UpdateUserPreferenceCommand
         {
             UserId = userId,
