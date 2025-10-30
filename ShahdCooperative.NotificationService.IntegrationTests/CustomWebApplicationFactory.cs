@@ -159,6 +159,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                     [SmsNotifications] BIT NOT NULL DEFAULT 1,
                     [PushNotifications] BIT NOT NULL DEFAULT 1,
                     [InAppNotifications] BIT NOT NULL DEFAULT 1,
+                    [MarketingEmails] BIT NOT NULL DEFAULT 1,
+                    [OrderUpdates] BIT NOT NULL DEFAULT 1,
+                    [SecurityAlerts] BIT NOT NULL DEFAULT 1,
+                    [NewsletterSubscription] BIT NOT NULL DEFAULT 0,
                     [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
                     [UpdatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE()
                 )
@@ -172,13 +176,12 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             BEGIN
                 CREATE TABLE [Notification].[NotificationLogs] (
                     [Id] UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-                    [NotificationType] NVARCHAR(50) NOT NULL,
+                    [Type] NVARCHAR(50) NOT NULL,
                     [Recipient] NVARCHAR(500) NOT NULL,
                     [Subject] NVARCHAR(500),
-                    [Body] NVARCHAR(MAX),
+                    [Message] NVARCHAR(MAX),
                     [Status] NVARCHAR(50) NOT NULL,
                     [SentAt] DATETIME2,
-                    [ErrorMessage] NVARCHAR(MAX),
                     [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE()
                 )
             END";
