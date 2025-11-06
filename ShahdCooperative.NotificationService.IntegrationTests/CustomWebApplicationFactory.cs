@@ -11,7 +11,8 @@ namespace ShahdCooperative.NotificationService.IntegrationTests;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
-    private readonly string _connectionString = "Server=.\\SQLEXPRESS;Database=ShahdCooperative;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true";
+    private readonly string _connectionString = Environment.GetEnvironmentVariable("INTEGRATION_TEST_CONNECTION_STRING")
+        ?? "Server=.\\SQLEXPRESS;Database=ShahdCooperative;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true";
 
     public string ConnectionString => _connectionString;
 
