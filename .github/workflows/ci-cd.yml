@@ -19,18 +19,6 @@ jobs:
       checks: write
       pull-requests: write
 
-    services:
-      sqlserver:
-        image: mcr.microsoft.com/mssql/server:2019-latest
-        env:
-          ACCEPT_EULA: "Y"
-          MSSQL_SA_PASSWORD: "YourStrong@Passw0rd123"
-        ports:
-          - 1433:1433
-
-    env:
-      INTEGRATION_TEST_CONNECTION_STRING: "Server=localhost,1433;Database=ShahdCooperative;User Id=sa;Password=YourStrong@Passw0rd123;TrustServerCertificate=True;MultipleActiveResultSets=true"
-
     steps:
     - uses: actions/checkout@v4
 
@@ -45,42 +33,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore --configuration Release
 
-    - name: Install SQL Server tools
-      run: |
-        curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-        curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
-        sudo apt-get update
-        sudo ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev
-        echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
-        source ~/.bashrc
-
-    - name: Wait for SQL Server
-      run: |
-        for i in {1..30}; do
-          if /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourStrong@Passw0rd123' -Q 'SELECT 1' > /dev/null 2>&1; then
-            echo "SQL Server is ready"
-            break
-          fi
-          echo "Waiting for SQL Server... ($i/30)"
-          sleep 2
-        done
-
-    - name: Initialize database
-      run: |
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourStrong@Passw0rd123' -i scripts/init-db.sql
-        if [ $? -ne 0 ]; then
-          echo "Database initialization failed"
-          exit 1
-        fi
-
-    - name: Verify database setup
-      run: |
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourStrong@Passw0rd123' -Q "SELECT name FROM sys.databases WHERE name = 'ShahdCooperative'"
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourStrong@Passw0rd123' -d ShahdCooperative -Q "SELECT name FROM sys.schemas WHERE name IN ('Security', 'Notification')"
-
     - name: Run tests
-      env:
-        INTEGRATION_TEST_CONNECTION_STRING: "Server=localhost,1433;Database=ShahdCooperative;User Id=sa;Password=YourStrong@Passw0rd123;TrustServerCertificate=True;MultipleActiveResultSets=true"
       run: dotnet test --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
     - name: Publish test results
