@@ -69,6 +69,8 @@ jobs:
       run: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourStrong@Passw0rd123' -i scripts/init-db.sql
 
     - name: Run tests
+      env:
+        INTEGRATION_TEST_CONNECTION_STRING: "Server=localhost,1433;Database=ShahdCooperative;User Id=sa;Password=YourStrong@Passw0rd123;TrustServerCertificate=True;MultipleActiveResultSets=true"
       run: dotnet test --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
     - name: Publish test results

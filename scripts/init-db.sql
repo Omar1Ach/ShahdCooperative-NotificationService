@@ -96,6 +96,8 @@ BEGIN
         ErrorMessage NVARCHAR(MAX) NULL,
         RetryCount INT NOT NULL DEFAULT 0,
         CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        UpdatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        IsDeleted BIT NOT NULL DEFAULT 0,
         CONSTRAINT CK_NotificationLogs_Type CHECK ([Type] IN ('Email', 'SMS', 'Push', 'InApp')),
         CONSTRAINT CK_NotificationLogs_Status CHECK (Status IN ('Pending', 'Sent', 'Failed', 'Cancelled'))
     );
