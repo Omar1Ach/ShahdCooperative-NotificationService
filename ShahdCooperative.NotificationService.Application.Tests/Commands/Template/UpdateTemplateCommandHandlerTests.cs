@@ -32,12 +32,27 @@ public class UpdateTemplateCommandHandlerTests
             IsActive = false
         };
 
+        var existingTemplate = new NotificationTemplate
+        {
+            Id = Guid.NewGuid(),
+            Key = "test-template",
+            Type = NotificationType.SMS,
+            Name = "Original Name",
+            Subject = "Original Subject",
+            Body = "Original Body",
+            IsActive = true
+        };
+
+        _mockTemplateRepository.Setup(x => x.GetByKeyAsync(command.TemplateKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existingTemplate);
+
         _mockTemplateRepository.Setup(x => x.UpdateAsync(It.IsAny<NotificationTemplate>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().BeTrue();
+        _mockTemplateRepository.Verify(x => x.GetByKeyAsync(command.TemplateKey, It.IsAny<CancellationToken>()), Times.Once);
         _mockTemplateRepository.Verify(x => x.UpdateAsync(It.Is<NotificationTemplate>(t =>
             t.Key == command.TemplateKey &&
             t.Type == command.NotificationType &&
@@ -61,12 +76,27 @@ public class UpdateTemplateCommandHandlerTests
             IsActive = false
         };
 
+        var existingTemplate = new NotificationTemplate
+        {
+            Id = Guid.NewGuid(),
+            Key = "test-template",
+            Type = NotificationType.Email,
+            Name = "Original Name",
+            Subject = "Original Subject",
+            Body = "Original Body",
+            IsActive = true
+        };
+
+        _mockTemplateRepository.Setup(x => x.GetByKeyAsync(command.TemplateKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existingTemplate);
+
         _mockTemplateRepository.Setup(x => x.UpdateAsync(It.IsAny<NotificationTemplate>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().BeTrue();
+        _mockTemplateRepository.Verify(x => x.GetByKeyAsync(command.TemplateKey, It.IsAny<CancellationToken>()), Times.Once);
         _mockTemplateRepository.Verify(x => x.UpdateAsync(It.Is<NotificationTemplate>(t =>
             t.IsActive == false
         ), It.IsAny<CancellationToken>()), Times.Once);
