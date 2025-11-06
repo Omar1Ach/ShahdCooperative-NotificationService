@@ -14,7 +14,7 @@ public class MarkAllAsReadCommandHandler : IRequestHandler<MarkAllAsReadCommand,
 
     public async Task<bool> Handle(MarkAllAsReadCommand request, CancellationToken cancellationToken)
     {
-        await _inAppRepository.MarkAllAsReadAsync(request.UserId, cancellationToken);
-        return true;
+        var rowsAffected = await _inAppRepository.MarkAllAsReadAsync(request.UserId, cancellationToken);
+        return rowsAffected > 0;
     }
 }

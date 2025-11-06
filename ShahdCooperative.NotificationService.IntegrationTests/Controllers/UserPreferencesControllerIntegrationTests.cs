@@ -49,10 +49,10 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
         var command = new CreateUserPreferenceCommand
         {
             UserId = userId,
-            EmailNotifications = true,
-            SmsNotifications = false,
-            PushNotifications = true,
-            InAppNotifications = true
+            EmailEnabled = true,
+            SmsEnabled = false,
+            PushEnabled = true,
+            InAppEnabled = true
         };
 
         // Act
@@ -71,10 +71,10 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
         var createCommand = new CreateUserPreferenceCommand
         {
             UserId = userId,
-            EmailNotifications = true,
-            SmsNotifications = false,
-            PushNotifications = true,
-            InAppNotifications = false
+            EmailEnabled = true,
+            SmsEnabled = false,
+            PushEnabled = true,
+            InAppEnabled = false
         };
         await _client.PostAsJsonAsync("/api/userpreferences", createCommand);
 
@@ -86,10 +86,10 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
         var preferences = await response.Content.ReadFromJsonAsync<NotificationPreference>();
         preferences.Should().NotBeNull();
         preferences!.UserId.Should().Be(userId);
-        preferences.EmailNotifications.Should().BeTrue();
-        preferences.SmsNotifications.Should().BeFalse();
-        preferences.PushNotifications.Should().BeTrue();
-        preferences.InAppNotifications.Should().BeFalse();
+        preferences.EmailEnabled.Should().BeTrue();
+        preferences.SmsEnabled.Should().BeFalse();
+        preferences.PushEnabled.Should().BeTrue();
+        preferences.InAppEnabled.Should().BeFalse();
     }
 
     [Fact]
@@ -100,20 +100,20 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
         var createCommand = new CreateUserPreferenceCommand
         {
             UserId = userId,
-            EmailNotifications = true,
-            SmsNotifications = true,
-            PushNotifications = true,
-            InAppNotifications = true
+            EmailEnabled = true,
+            SmsEnabled = true,
+            PushEnabled = true,
+            InAppEnabled = true
         };
         await _client.PostAsJsonAsync("/api/userpreferences", createCommand);
 
         var updateCommand = new UpdateUserPreferenceCommand
         {
             UserId = userId,
-            EmailNotifications = false,
-            SmsNotifications = false,
-            PushNotifications = false,
-            InAppNotifications = false
+            EmailEnabled = false,
+            SmsEnabled = false,
+            PushEnabled = false,
+            InAppEnabled = false
         };
 
         // Act
@@ -125,10 +125,10 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
         // Verify update
         var getResponse = await _client.GetAsync($"/api/userpreferences/{userId}");
         var preferences = await getResponse.Content.ReadFromJsonAsync<NotificationPreference>();
-        preferences!.EmailNotifications.Should().BeFalse();
-        preferences.SmsNotifications.Should().BeFalse();
-        preferences.PushNotifications.Should().BeFalse();
-        preferences.InAppNotifications.Should().BeFalse();
+        preferences!.EmailEnabled.Should().BeFalse();
+        preferences.SmsEnabled.Should().BeFalse();
+        preferences.PushEnabled.Should().BeFalse();
+        preferences.InAppEnabled.Should().BeFalse();
     }
 
     [Fact]
@@ -140,10 +140,10 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
         var updateCommand = new UpdateUserPreferenceCommand
         {
             UserId = userId1,
-            EmailNotifications = true,
-            SmsNotifications = true,
-            PushNotifications = true,
-            InAppNotifications = true
+            EmailEnabled = true,
+            SmsEnabled = true,
+            PushEnabled = true,
+            InAppEnabled = true
         };
 
         // Act
@@ -161,10 +161,10 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
         var updateCommand = new UpdateUserPreferenceCommand
         {
             UserId = userId,
-            EmailNotifications = true,
-            SmsNotifications = true,
-            PushNotifications = true,
-            InAppNotifications = true
+            EmailEnabled = true,
+            SmsEnabled = true,
+            PushEnabled = true,
+            InAppEnabled = true
         };
 
         // Act

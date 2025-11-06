@@ -46,10 +46,10 @@ public class UserPreferencesControllerTests
         {
             Id = Guid.NewGuid(),
             UserId = userId,
-            EmailNotifications = true,
-            SmsNotifications = false,
-            PushNotifications = true,
-            InAppNotifications = true
+            EmailEnabled = true,
+            SmsEnabled = false,
+            PushEnabled = true,
+            InAppEnabled = true
         };
 
         _mockMediator.Setup(x => x.Send(It.IsAny<GetUserPreferenceQuery>(), It.IsAny<CancellationToken>()))
@@ -96,8 +96,8 @@ public class UserPreferencesControllerTests
         var command = new CreateUserPreferenceCommand
         {
             UserId = Guid.NewGuid(),
-            EmailNotifications = true,
-            SmsNotifications = false
+            EmailEnabled = true,
+            SmsEnabled = false
         };
 
         var preferenceId = Guid.NewGuid();
@@ -136,8 +136,8 @@ public class UserPreferencesControllerTests
         var command = new UpdateUserPreferenceCommand
         {
             UserId = userId,
-            EmailNotifications = false,
-            SmsNotifications = true
+            EmailEnabled = false,
+            SmsEnabled = true
         };
 
         _mockMediator.Setup(x => x.Send(It.IsAny<UpdateUserPreferenceCommand>(), It.IsAny<CancellationToken>()))
@@ -155,7 +155,7 @@ public class UserPreferencesControllerTests
         var command = new UpdateUserPreferenceCommand
         {
             UserId = Guid.NewGuid(),
-            EmailNotifications = false
+            EmailEnabled = false
         };
 
         var result = await _controller.UpdateUserPreferences(userId, command, CancellationToken.None);
@@ -170,7 +170,7 @@ public class UserPreferencesControllerTests
         var command = new UpdateUserPreferenceCommand
         {
             UserId = userId,
-            EmailNotifications = false
+            EmailEnabled = false
         };
 
         _mockMediator.Setup(x => x.Send(It.IsAny<UpdateUserPreferenceCommand>(), It.IsAny<CancellationToken>()))
@@ -188,7 +188,7 @@ public class UserPreferencesControllerTests
         var command = new UpdateUserPreferenceCommand
         {
             UserId = userId,
-            EmailNotifications = false
+            EmailEnabled = false
         };
 
         _mockMediator.Setup(x => x.Send(It.IsAny<UpdateUserPreferenceCommand>(), It.IsAny<CancellationToken>()))

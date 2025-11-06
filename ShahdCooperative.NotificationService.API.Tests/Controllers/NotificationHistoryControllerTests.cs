@@ -48,7 +48,7 @@ public class NotificationHistoryControllerTests
             {
                 Id = Guid.NewGuid(),
                 Type = NotificationType.Email,
-                Recipient = recipient,
+                RecipientEmail = recipient,
                 Subject = "Test",
                 Message = "Test message",
                 Status = NotificationStatus.Sent,

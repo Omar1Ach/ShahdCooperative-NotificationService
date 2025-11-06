@@ -22,14 +22,10 @@ public class UpdateUserPreferenceCommandHandler : IRequestHandler<UpdateUserPref
             return false;
         }
 
-        existingPreference.EmailNotifications = request.EmailNotifications;
-        existingPreference.SmsNotifications = request.SmsNotifications;
-        existingPreference.PushNotifications = request.PushNotifications;
-        existingPreference.InAppNotifications = request.InAppNotifications;
-        existingPreference.MarketingEmails = request.MarketingEmails;
-        existingPreference.OrderUpdates = request.OrderUpdates;
-        existingPreference.SecurityAlerts = request.SecurityAlerts;
-        existingPreference.NewsletterSubscription = request.NewsletterSubscription;
+        existingPreference.EmailEnabled = request.EmailEnabled;
+        existingPreference.SmsEnabled = request.SmsEnabled;
+        existingPreference.PushEnabled = request.PushEnabled;
+        existingPreference.InAppEnabled = request.InAppEnabled;
         existingPreference.UpdatedAt = DateTime.UtcNow;
 
         await _preferenceRepository.UpdateAsync(existingPreference, cancellationToken);

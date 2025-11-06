@@ -25,9 +25,22 @@ public class InAppNotificationRepository : IInAppNotificationRepository
         notification.Id = notification.Id == Guid.Empty ? Guid.NewGuid() : notification.Id;
         notification.CreatedAt = DateTime.UtcNow;
 
+        var parameters = new DynamicParameters();
+        parameters.Add("@Id", notification.Id);
+        parameters.Add("@UserId", notification.UserId);
+        parameters.Add("@Title", notification.Title);
+        parameters.Add("@Message", notification.Message);
+        parameters.Add("@Type", notification.Type.ToString());
+        parameters.Add("@Category", notification.Category);
+        parameters.Add("@ActionUrl", notification.ActionUrl);
+        parameters.Add("@IsRead", notification.IsRead);
+        parameters.Add("@ReadAt", notification.ReadAt);
+        parameters.Add("@CreatedAt", notification.CreatedAt);
+        parameters.Add("@ExpiresAt", notification.ExpiresAt);
+
         using var connection = new SqlConnection(_connectionString);
         await connection.ExecuteAsync(
-            new CommandDefinition(sql, notification, cancellationToken: cancellationToken));
+            new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
 
         return notification.Id;
     }
@@ -68,7 +81,7 @@ public class InAppNotificationRepository : IInAppNotificationRepository
             new CommandDefinition(sql, new { UserId = userId }, cancellationToken: cancellationToken));
     }
 
-    public async Task MarkAsReadAsync(Guid notificationId, CancellationToken cancellationToken = default)
+    public async Task<int> MarkAsReadAsync(Guid notificationId, CancellationToken cancellationToken = default)
     {
         const string sql = @"
             UPDATE Notification.InAppNotifications
@@ -77,11 +90,11 @@ public class InAppNotificationRepository : IInAppNotificationRepository
             WHERE Id = @NotificationId";
 
         using var connection = new SqlConnection(_connectionString);
-        await connection.ExecuteAsync(
+        return await connection.ExecuteAsync(
             new CommandDefinition(sql, new { NotificationId = notificationId }, cancellationToken: cancellationToken));
     }
 
-    public async Task MarkAllAsReadAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<int> MarkAllAsReadAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         const string sql = @"
             UPDATE Notification.InAppNotifications
@@ -91,7 +104,7 @@ public class InAppNotificationRepository : IInAppNotificationRepository
               AND IsRead = 0";
 
         using var connection = new SqlConnection(_connectionString);
-        await connection.ExecuteAsync(
+        return await connection.ExecuteAsync(
             new CommandDefinition(sql, new { UserId = userId }, cancellationToken: cancellationToken));
     }
 

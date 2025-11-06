@@ -1,3 +1,4 @@
+using Dapper;
 using Hangfire;
 using Hangfire.SqlServer;
 using ShahdCooperative.NotificationService.API.BackgroundServices;
@@ -12,6 +13,7 @@ using ShahdCooperative.NotificationService.Infrastructure.Services.Email;
 using ShahdCooperative.NotificationService.Infrastructure.Services.Sms;
 using ShahdCooperative.NotificationService.Infrastructure.Services.Push;
 using ShahdCooperative.NotificationService.Infrastructure.Services.InApp;
+using ShahdCooperative.NotificationService.Infrastructure.TypeHandlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,12 @@ builder.Services.Configure<PushNotificationSettings>(builder.Configuration.GetSe
 // Get connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+// Configure Dapper to use string enum type handlers
+SqlMapper.AddTypeHandler(new StringEnumTypeHandler<NotificationType>());
+SqlMapper.AddTypeHandler(new StringEnumTypeHandler<NotificationStatus>());
+SqlMapper.AddTypeHandler(new StringEnumTypeHandler<NotificationPriority>());
+SqlMapper.AddTypeHandler(new StringEnumTypeHandler<InAppNotificationType>());
 
 // Register repositories
 builder.Services.AddScoped<INotificationTemplateRepository>(sp =>

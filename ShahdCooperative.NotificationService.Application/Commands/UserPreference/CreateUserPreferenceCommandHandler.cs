@@ -18,14 +18,10 @@ public class CreateUserPreferenceCommandHandler : IRequestHandler<CreateUserPref
         var preference = new NotificationPreference
         {
             UserId = request.UserId,
-            EmailNotifications = request.EmailNotifications,
-            SmsNotifications = request.SmsNotifications,
-            PushNotifications = request.PushNotifications,
-            InAppNotifications = request.InAppNotifications,
-            MarketingEmails = request.MarketingEmails,
-            OrderUpdates = request.OrderUpdates,
-            SecurityAlerts = request.SecurityAlerts,
-            NewsletterSubscription = request.NewsletterSubscription
+            EmailEnabled = request.EmailEnabled,
+            SmsEnabled = request.SmsEnabled,
+            PushEnabled = request.PushEnabled,
+            InAppEnabled = request.InAppEnabled
         };
 
         return await _preferenceRepository.CreateAsync(preference, cancellationToken);

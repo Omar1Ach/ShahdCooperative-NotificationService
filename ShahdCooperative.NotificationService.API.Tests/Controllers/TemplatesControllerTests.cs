@@ -46,10 +46,10 @@ public class TemplatesControllerTests
         {
             new NotificationTemplate
             {
-                TemplateKey = "template-1",
-                NotificationType = NotificationType.Email,
-                TemplateName = "Template 1",
-                BodyTemplate = "Body 1"
+                Key = "template-1",
+                Type = NotificationType.Email,
+                Name = "Template 1",
+                Body = "Body 1"
             }
         };
 
@@ -81,10 +81,10 @@ public class TemplatesControllerTests
     {
         var template = new NotificationTemplate
         {
-            TemplateKey = "test-template",
-            NotificationType = NotificationType.Email,
-            TemplateName = "Test Template",
-            BodyTemplate = "Test Body"
+            Key = "test-template",
+            Type = NotificationType.Email,
+            Name = "Test Template",
+            Body = "Test Body"
         };
 
         _mockMediator.Setup(x => x.Send(It.IsAny<GetTemplateByKeyQuery>(), It.IsAny<CancellationToken>()))

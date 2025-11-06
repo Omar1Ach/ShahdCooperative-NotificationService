@@ -28,9 +28,26 @@ public class NotificationQueueRepository : INotificationQueueRepository
         notification.Id = notification.Id == Guid.Empty ? Guid.NewGuid() : notification.Id;
         notification.CreatedAt = DateTime.UtcNow;
 
+        var parameters = new DynamicParameters();
+        parameters.Add("@Id", notification.Id);
+        parameters.Add("@NotificationType", notification.NotificationType.ToString());
+        parameters.Add("@Recipient", notification.Recipient);
+        parameters.Add("@Subject", notification.Subject);
+        parameters.Add("@Body", notification.Body);
+        parameters.Add("@TemplateKey", notification.TemplateKey);
+        parameters.Add("@TemplateData", notification.TemplateData);
+        parameters.Add("@Priority", notification.Priority.ToString());
+        parameters.Add("@Status", notification.Status.ToString());
+        parameters.Add("@AttemptCount", notification.AttemptCount);
+        parameters.Add("@MaxRetries", notification.MaxRetries);
+        parameters.Add("@NextRetryAt", notification.NextRetryAt);
+        parameters.Add("@ErrorMessage", notification.ErrorMessage);
+        parameters.Add("@CreatedAt", notification.CreatedAt);
+        parameters.Add("@ProcessedAt", notification.ProcessedAt);
+
         using var connection = new SqlConnection(_connectionString);
         await connection.ExecuteAsync(
-            new CommandDefinition(sql, notification, cancellationToken: cancellationToken));
+            new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
 
         return notification.Id;
     }
@@ -125,7 +142,7 @@ public class NotificationQueueRepository : INotificationQueueRepository
         using var connection = new SqlConnection(_connectionString);
         return await connection.QueryAsync<NotificationQueue>(
             new CommandDefinition(sql,
-                new { ScheduledStatus = NotificationStatus.Scheduled, CurrentTime = currentTime },
+                new { ScheduledStatus = NotificationStatus.Scheduled.ToString(), CurrentTime = currentTime },
                 cancellationToken: cancellationToken));
     }
 
@@ -144,7 +161,7 @@ public class NotificationQueueRepository : INotificationQueueRepository
         using var connection = new SqlConnection(_connectionString);
         return await connection.QueryAsync<NotificationQueue>(
             new CommandDefinition(sql,
-                new { FailedStatus = NotificationStatus.Failed, CurrentTime = currentTime },
+                new { FailedStatus = NotificationStatus.Failed.ToString(), CurrentTime = currentTime },
                 cancellationToken: cancellationToken));
     }
 }

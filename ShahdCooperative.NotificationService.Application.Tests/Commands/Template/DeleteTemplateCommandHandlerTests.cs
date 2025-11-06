@@ -30,10 +30,10 @@ public class DeleteTemplateCommandHandlerTests
         var template = new NotificationTemplate
         {
             Id = Guid.NewGuid(),
-            TemplateKey = command.TemplateKey,
-            NotificationType = NotificationType.Email,
-            TemplateName = "Test",
-            BodyTemplate = "Body"
+            Key = command.TemplateKey,
+            Type = NotificationType.Email,
+            Name = "Test",
+            Body = "Body"
         };
 
         _mockTemplateRepository.Setup(x => x.GetByKeyAsync(command.TemplateKey, It.IsAny<CancellationToken>()))

@@ -18,16 +18,34 @@ public class NotificationLogRepository : INotificationLogRepository
     {
         const string sql = @"
             INSERT INTO Notification.NotificationLogs
-                (Id, Type, Recipient, Subject, Message, Status, SentAt, CreatedAt)
+                (Id, UserId, RecipientEmail, RecipientPhone, Type, Subject, Message, Status, SentAt, RetryCount, Metadata, CreatedAt, UpdatedAt, IsDeleted, ErrorMessage)
             VALUES
-                (@Id, @Type, @Recipient, @Subject, @Message, @Status, @SentAt, @CreatedAt)";
+                (@Id, @UserId, @RecipientEmail, @RecipientPhone, @Type, @Subject, @Message, @Status, @SentAt, @RetryCount, @Metadata, @CreatedAt, @UpdatedAt, @IsDeleted, @ErrorMessage)";
 
         log.Id = log.Id == Guid.Empty ? Guid.NewGuid() : log.Id;
         log.CreatedAt = DateTime.UtcNow;
+        log.UpdatedAt = DateTime.UtcNow;
+
+        var parameters = new DynamicParameters();
+        parameters.Add("@Id", log.Id);
+        parameters.Add("@UserId", log.UserId);
+        parameters.Add("@RecipientEmail", log.RecipientEmail);
+        parameters.Add("@RecipientPhone", log.RecipientPhone);
+        parameters.Add("@Type", log.Type.ToString());
+        parameters.Add("@Subject", log.Subject);
+        parameters.Add("@Message", log.Message);
+        parameters.Add("@Status", log.Status.ToString());
+        parameters.Add("@SentAt", log.SentAt);
+        parameters.Add("@RetryCount", log.RetryCount);
+        parameters.Add("@Metadata", log.Metadata);
+        parameters.Add("@CreatedAt", log.CreatedAt);
+        parameters.Add("@UpdatedAt", log.UpdatedAt);
+        parameters.Add("@IsDeleted", log.IsDeleted);
+        parameters.Add("@ErrorMessage", log.ErrorMessage);
 
         using var connection = new SqlConnection(_connectionString);
         await connection.ExecuteAsync(
-            new CommandDefinition(sql, log, cancellationToken: cancellationToken));
+            new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
 
         return log.Id;
     }
@@ -35,8 +53,9 @@ public class NotificationLogRepository : INotificationLogRepository
     public async Task<IEnumerable<NotificationLog>> GetLogsAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
     {
         const string sql = @"
-            SELECT Id, Type, Recipient, Subject, Message, Status, SentAt, CreatedAt
+            SELECT Id, UserId, RecipientEmail, RecipientPhone, Type, Subject, Message, Status, SentAt, RetryCount, Metadata, CreatedAt, UpdatedAt, IsDeleted, ErrorMessage
             FROM Notification.NotificationLogs
+            WHERE IsDeleted = 0
             ORDER BY CreatedAt DESC
             OFFSET @Offset ROWS
             FETCH NEXT @PageSize ROWS ONLY";
@@ -53,9 +72,9 @@ public class NotificationLogRepository : INotificationLogRepository
     public async Task<IEnumerable<NotificationLog>> GetLogsByRecipientAsync(string recipient, CancellationToken cancellationToken = default)
     {
         const string sql = @"
-            SELECT Id, Type, Recipient, Subject, Message, Status, SentAt, CreatedAt
+            SELECT Id, UserId, RecipientEmail, RecipientPhone, Type, Subject, Message, Status, SentAt, RetryCount, Metadata, CreatedAt, UpdatedAt, IsDeleted, ErrorMessage
             FROM Notification.NotificationLogs
-            WHERE Recipient = @Recipient
+            WHERE (RecipientEmail = @Recipient OR RecipientPhone = @Recipient) AND IsDeleted = 0
             ORDER BY CreatedAt DESC";
 
         using var connection = new SqlConnection(_connectionString);
@@ -65,7 +84,7 @@ public class NotificationLogRepository : INotificationLogRepository
 
     public async Task<int> GetTotalCountAsync(CancellationToken cancellationToken = default)
     {
-        const string sql = "SELECT COUNT(*) FROM Notification.NotificationLogs";
+        const string sql = "SELECT COUNT(*) FROM Notification.NotificationLogs WHERE IsDeleted = 0";
 
         using var connection = new SqlConnection(_connectionString);
         return await connection.ExecuteScalarAsync<int>(

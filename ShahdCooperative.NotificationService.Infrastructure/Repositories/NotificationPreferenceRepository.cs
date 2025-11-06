@@ -17,8 +17,8 @@ public class NotificationPreferenceRepository : INotificationPreferenceRepositor
     public async Task<NotificationPreference?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         const string sql = @"
-            SELECT Id, UserId, EmailNotifications, SmsNotifications, PushNotifications, InAppNotifications,
-                   MarketingEmails, OrderUpdates, SecurityAlerts, NewsletterSubscription, CreatedAt, UpdatedAt
+            SELECT Id, UserId, EmailEnabled, SmsEnabled, PushEnabled, InAppEnabled,
+                   CreatedAt, UpdatedAt
             FROM Notification.NotificationPreferences
             WHERE UserId = @UserId";
 
@@ -31,11 +31,9 @@ public class NotificationPreferenceRepository : INotificationPreferenceRepositor
     {
         const string sql = @"
             INSERT INTO Notification.NotificationPreferences
-                (Id, UserId, EmailNotifications, SmsNotifications, PushNotifications, InAppNotifications,
-                 MarketingEmails, OrderUpdates, SecurityAlerts, NewsletterSubscription, CreatedAt, UpdatedAt)
+                (Id, UserId, EmailEnabled, SmsEnabled, PushEnabled, InAppEnabled, CreatedAt, UpdatedAt)
             VALUES
-                (@Id, @UserId, @EmailNotifications, @SmsNotifications, @PushNotifications, @InAppNotifications,
-                 @MarketingEmails, @OrderUpdates, @SecurityAlerts, @NewsletterSubscription, @CreatedAt, @UpdatedAt)";
+                (@Id, @UserId, @EmailEnabled, @SmsEnabled, @PushEnabled, @InAppEnabled, @CreatedAt, @UpdatedAt)";
 
         preference.Id = preference.Id == Guid.Empty ? Guid.NewGuid() : preference.Id;
         preference.CreatedAt = DateTime.UtcNow;
@@ -52,14 +50,10 @@ public class NotificationPreferenceRepository : INotificationPreferenceRepositor
     {
         const string sql = @"
             UPDATE Notification.NotificationPreferences
-            SET EmailNotifications = @EmailNotifications,
-                SmsNotifications = @SmsNotifications,
-                PushNotifications = @PushNotifications,
-                InAppNotifications = @InAppNotifications,
-                MarketingEmails = @MarketingEmails,
-                OrderUpdates = @OrderUpdates,
-                SecurityAlerts = @SecurityAlerts,
-                NewsletterSubscription = @NewsletterSubscription,
+            SET EmailEnabled = @EmailEnabled,
+                SmsEnabled = @SmsEnabled,
+                PushEnabled = @PushEnabled,
+                InAppEnabled = @InAppEnabled,
                 UpdatedAt = @UpdatedAt
             WHERE UserId = @UserId";
 

@@ -24,14 +24,10 @@ public class CreateUserPreferenceCommandHandlerTests
         var command = new CreateUserPreferenceCommand
         {
             UserId = Guid.NewGuid(),
-            EmailNotifications = true,
-            SmsNotifications = false,
-            PushNotifications = true,
-            InAppNotifications = true,
-            MarketingEmails = false,
-            OrderUpdates = true,
-            SecurityAlerts = true,
-            NewsletterSubscription = false
+            EmailEnabled = true,
+            SmsEnabled = false,
+            PushEnabled = true,
+            InAppEnabled = true
         };
 
         var expectedId = Guid.NewGuid();
@@ -43,14 +39,10 @@ public class CreateUserPreferenceCommandHandlerTests
         result.Should().Be(expectedId);
         _mockPreferenceRepository.Verify(x => x.CreateAsync(It.Is<NotificationPreference>(p =>
             p.UserId == command.UserId &&
-            p.EmailNotifications == command.EmailNotifications &&
-            p.SmsNotifications == command.SmsNotifications &&
-            p.PushNotifications == command.PushNotifications &&
-            p.InAppNotifications == command.InAppNotifications &&
-            p.MarketingEmails == command.MarketingEmails &&
-            p.OrderUpdates == command.OrderUpdates &&
-            p.SecurityAlerts == command.SecurityAlerts &&
-            p.NewsletterSubscription == command.NewsletterSubscription
+            p.EmailEnabled == command.EmailEnabled &&
+            p.SmsEnabled == command.SmsEnabled &&
+            p.PushEnabled == command.PushEnabled &&
+            p.InAppEnabled == command.InAppEnabled
         ), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -70,10 +62,10 @@ public class CreateUserPreferenceCommandHandlerTests
 
         result.Should().Be(expectedId);
         _mockPreferenceRepository.Verify(x => x.CreateAsync(It.Is<NotificationPreference>(p =>
-            p.EmailNotifications == true &&
-            p.SmsNotifications == false &&
-            p.PushNotifications == true &&
-            p.InAppNotifications == true
+            p.EmailEnabled == true &&
+            p.SmsEnabled == false &&
+            p.PushEnabled == true &&
+            p.InAppEnabled == true
         ), It.IsAny<CancellationToken>()), Times.Once);
     }
 

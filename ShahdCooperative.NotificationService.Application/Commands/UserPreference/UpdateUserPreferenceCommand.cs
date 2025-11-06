@@ -5,12 +5,8 @@ namespace ShahdCooperative.NotificationService.Application.Commands.UserPreferen
 public class UpdateUserPreferenceCommand : IRequest<bool>
 {
     public Guid UserId { get; set; }
-    public bool EmailNotifications { get; set; }
-    public bool SmsNotifications { get; set; }
-    public bool PushNotifications { get; set; }
-    public bool InAppNotifications { get; set; }
-    public bool MarketingEmails { get; set; }
-    public bool OrderUpdates { get; set; }
-    public bool SecurityAlerts { get; set; }
-    public bool NewsletterSubscription { get; set; }
+    public bool EmailEnabled { get; set; }
+    public bool SmsEnabled { get; set; }
+    public bool PushEnabled { get; set; }
+    public bool InAppEnabled { get; set; }
 }

@@ -26,27 +26,19 @@ public class UpdateUserPreferenceCommandHandlerTests
         {
             Id = Guid.NewGuid(),
             UserId = userId,
-            EmailNotifications = true,
-            SmsNotifications = false,
-            PushNotifications = true,
-            InAppNotifications = true,
-            MarketingEmails = true,
-            OrderUpdates = true,
-            SecurityAlerts = true,
-            NewsletterSubscription = false
+            EmailEnabled = true,
+            SmsEnabled = false,
+            PushEnabled = true,
+            InAppEnabled = true
         };
 
         var command = new UpdateUserPreferenceCommand
         {
             UserId = userId,
-            EmailNotifications = false,
-            SmsNotifications = true,
-            PushNotifications = false,
-            InAppNotifications = true,
-            MarketingEmails = false,
-            OrderUpdates = true,
-            SecurityAlerts = true,
-            NewsletterSubscription = true
+            EmailEnabled = false,
+            SmsEnabled = true,
+            PushEnabled = false,
+            InAppEnabled = true
         };
 
         _mockPreferenceRepository.Setup(x => x.GetByUserIdAsync(userId, It.IsAny<CancellationToken>()))
@@ -60,14 +52,10 @@ public class UpdateUserPreferenceCommandHandlerTests
         result.Should().BeTrue();
         _mockPreferenceRepository.Verify(x => x.UpdateAsync(It.Is<NotificationPreference>(p =>
             p.UserId == command.UserId &&
-            p.EmailNotifications == command.EmailNotifications &&
-            p.SmsNotifications == command.SmsNotifications &&
-            p.PushNotifications == command.PushNotifications &&
-            p.InAppNotifications == command.InAppNotifications &&
-            p.MarketingEmails == command.MarketingEmails &&
-            p.OrderUpdates == command.OrderUpdates &&
-            p.SecurityAlerts == command.SecurityAlerts &&
-            p.NewsletterSubscription == command.NewsletterSubscription
+            p.EmailEnabled == command.EmailEnabled &&
+            p.SmsEnabled == command.SmsEnabled &&
+            p.PushEnabled == command.PushEnabled &&
+            p.InAppEnabled == command.InAppEnabled
         ), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -78,7 +66,7 @@ public class UpdateUserPreferenceCommandHandlerTests
         var command = new UpdateUserPreferenceCommand
         {
             UserId = userId,
-            EmailNotifications = false
+            EmailEnabled = false
         };
 
         _mockPreferenceRepository.Setup(x => x.GetByUserIdAsync(userId, It.IsAny<CancellationToken>()))

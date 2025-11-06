@@ -15,17 +15,23 @@ public class UpdateTemplateCommandHandler : IRequestHandler<UpdateTemplateComman
 
     public async Task<bool> Handle(UpdateTemplateCommand request, CancellationToken cancellationToken)
     {
-        var template = new NotificationTemplate
-        {
-            TemplateKey = request.TemplateKey,
-            NotificationType = request.NotificationType,
-            TemplateName = request.TemplateName,
-            Subject = request.Subject ?? string.Empty,
-            BodyTemplate = request.BodyTemplate,
-            IsActive = request.IsActive
-        };
+        // First, get the existing template by key to get its Id
+        var existingTemplate = await _templateRepository.GetByKeyAsync(request.TemplateKey, cancellationToken);
 
-        await _templateRepository.UpdateAsync(template, cancellationToken);
+        if (existingTemplate == null)
+        {
+            return false;
+        }
+
+        // Update the template properties
+        existingTemplate.Key = request.TemplateKey;
+        existingTemplate.Type = request.NotificationType;
+        existingTemplate.Name = request.TemplateName;
+        existingTemplate.Subject = request.Subject;
+        existingTemplate.Body = request.BodyTemplate;
+        existingTemplate.IsActive = request.IsActive;
+
+        await _templateRepository.UpdateAsync(existingTemplate, cancellationToken);
         return true;
     }
 }

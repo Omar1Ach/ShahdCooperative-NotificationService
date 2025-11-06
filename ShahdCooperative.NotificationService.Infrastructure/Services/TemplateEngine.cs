@@ -37,7 +37,7 @@ public class TemplateEngine : ITemplateEngine
             }
 
             var tokens = ParseTemplateData(templateData);
-            var processedBody = ReplaceTokens(template.BodyTemplate, tokens);
+            var processedBody = ReplaceTokens(template.Body, tokens);
 
             return processedBody;
         }

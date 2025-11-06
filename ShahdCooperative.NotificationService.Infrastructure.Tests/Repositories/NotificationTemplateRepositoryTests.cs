@@ -48,16 +48,16 @@ public class NotificationTemplateRepositoryTests
         var template = new NotificationTemplate
         {
             Id = Guid.Empty,
-            TemplateKey = "test.template",
-            TemplateName = "Test Template",
+            Key = "test.template",
+            Name = "Test Template",
             Subject = "Test Subject",
-            BodyTemplate = "Test Body {{placeholder}}",
-            NotificationType = NotificationType.Email
+            Body = "Test Body {{placeholder}}",
+            Type = NotificationType.Email
         };
 
         // Verify the entity structure is correct
         template.Should().NotBeNull();
-        template.TemplateKey.Should().Be("test.template");
-        template.NotificationType.Should().Be(NotificationType.Email);
+        template.Key.Should().Be("test.template");
+        template.Type.Should().Be(NotificationType.Email);
     }
 }

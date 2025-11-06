@@ -124,15 +124,31 @@ public class NotificationQueueProcessor : BackgroundService
             {
                 await queueRepository.UpdateStatusAsync(notification.Id, NotificationStatus.Sent, cancellationToken);
 
-                await logRepository.CreateAsync(new NotificationLog
+                var log = new NotificationLog
                 {
                     Type = notification.NotificationType,
-                    Recipient = notification.Recipient,
                     Subject = notification.Subject,
                     Message = notification.Body,
                     Status = NotificationStatus.Sent,
                     SentAt = DateTime.UtcNow
-                }, cancellationToken);
+                };
+
+                // Set the appropriate recipient field based on notification type
+                if (notification.NotificationType == NotificationType.Email)
+                {
+                    log.RecipientEmail = notification.Recipient;
+                }
+                else if (notification.NotificationType == NotificationType.SMS)
+                {
+                    log.RecipientPhone = notification.Recipient;
+                }
+                else
+                {
+                    // For Push and InApp, store in email field as fallback
+                    log.RecipientEmail = notification.Recipient;
+                }
+
+                await logRepository.CreateAsync(log, cancellationToken);
 
                 _logger.LogInformation("Notification {Id} sent successfully to {Recipient}",
                     notification.Id, notification.Recipient);

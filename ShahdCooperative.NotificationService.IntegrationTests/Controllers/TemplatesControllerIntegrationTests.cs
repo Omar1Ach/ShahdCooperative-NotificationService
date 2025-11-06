@@ -86,8 +86,8 @@ public class TemplatesControllerIntegrationTests : IClassFixture<CustomWebApplic
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var template = await response.Content.ReadFromJsonAsync<NotificationTemplate>();
         template.Should().NotBeNull();
-        template!.TemplateKey.Should().Be("test-template");
-        template.TemplateName.Should().Be("Test Template");
+        template!.Key.Should().Be("test-template");
+        template.Name.Should().Be("Test Template");
     }
 
     [Fact]
@@ -133,7 +133,7 @@ public class TemplatesControllerIntegrationTests : IClassFixture<CustomWebApplic
         // Verify update
         var getResponse = await _client.GetAsync("/api/templates/update-test");
         var template = await getResponse.Content.ReadFromJsonAsync<NotificationTemplate>();
-        template!.TemplateName.Should().Be("Updated Name");
+        template!.Name.Should().Be("Updated Name");
         template.Subject.Should().Be("Updated Subject");
     }
 

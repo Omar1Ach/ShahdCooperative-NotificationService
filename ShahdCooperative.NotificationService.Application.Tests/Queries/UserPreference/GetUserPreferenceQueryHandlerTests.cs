@@ -26,14 +26,10 @@ public class GetUserPreferenceQueryHandlerTests
         {
             Id = Guid.NewGuid(),
             UserId = userId,
-            EmailNotifications = true,
-            SmsNotifications = false,
-            PushNotifications = true,
-            InAppNotifications = true,
-            MarketingEmails = true,
-            OrderUpdates = true,
-            SecurityAlerts = true,
-            NewsletterSubscription = false
+            EmailEnabled = true,
+            SmsEnabled = false,
+            PushEnabled = true,
+            InAppEnabled = true
         };
 
         _mockPreferenceRepository.Setup(x => x.GetByUserIdAsync(userId, It.IsAny<CancellationToken>()))

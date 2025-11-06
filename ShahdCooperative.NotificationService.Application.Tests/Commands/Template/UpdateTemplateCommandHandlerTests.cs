@@ -39,11 +39,11 @@ public class UpdateTemplateCommandHandlerTests
 
         result.Should().BeTrue();
         _mockTemplateRepository.Verify(x => x.UpdateAsync(It.Is<NotificationTemplate>(t =>
-            t.TemplateKey == command.TemplateKey &&
-            t.NotificationType == command.NotificationType &&
-            t.TemplateName == command.TemplateName &&
+            t.Key == command.TemplateKey &&
+            t.Type == command.NotificationType &&
+            t.Name == command.TemplateName &&
             t.Subject == command.Subject &&
-            t.BodyTemplate == command.BodyTemplate &&
+            t.Body == command.BodyTemplate &&
             t.IsActive == command.IsActive
         ), It.IsAny<CancellationToken>()), Times.Once);
     }

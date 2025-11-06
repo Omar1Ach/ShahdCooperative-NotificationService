@@ -24,7 +24,7 @@ public class MarkAsReadCommandHandlerTests
         var command = new MarkAsReadCommand { NotificationId = notificationId };
 
         _mockInAppRepository.Setup(x => x.MarkAsReadAsync(notificationId, It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(1);
 
         var result = await _handler.Handle(command, CancellationToken.None);
 

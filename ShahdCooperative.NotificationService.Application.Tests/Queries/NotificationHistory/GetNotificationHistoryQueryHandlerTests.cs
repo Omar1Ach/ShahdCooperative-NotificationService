@@ -29,7 +29,7 @@ public class GetNotificationHistoryQueryHandlerTests
             {
                 Id = Guid.NewGuid(),
                 Type = NotificationType.Email,
-                Recipient = recipient,
+                RecipientEmail = recipient,
                 Subject = "Welcome",
                 Message = "Welcome message",
                 Status = NotificationStatus.Sent,
@@ -40,7 +40,7 @@ public class GetNotificationHistoryQueryHandlerTests
             {
                 Id = Guid.NewGuid(),
                 Type = NotificationType.SMS,
-                Recipient = recipient,
+                RecipientPhone = recipient,
                 Subject = null,
                 Message = "SMS message",
                 Status = NotificationStatus.Sent,

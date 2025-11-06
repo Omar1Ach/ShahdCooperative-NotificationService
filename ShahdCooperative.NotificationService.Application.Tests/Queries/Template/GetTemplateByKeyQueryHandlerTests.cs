@@ -24,11 +24,11 @@ public class GetTemplateByKeyQueryHandlerTests
     {
         var expectedTemplate = new NotificationTemplate
         {
-            TemplateKey = "test-template",
-            NotificationType = NotificationType.Email,
-            TemplateName = "Test Template",
+            Key = "test-template",
+            Type = NotificationType.Email,
+            Name = "Test Template",
             Subject = "Test Subject",
-            BodyTemplate = "Test Body",
+            Body = "Test Body",
             IsActive = true
         };
 

@@ -26,20 +26,20 @@ public class GetAllTemplatesQueryHandlerTests
         {
             new NotificationTemplate
             {
-                TemplateKey = "template-1",
-                NotificationType = NotificationType.Email,
-                TemplateName = "Template 1",
+                Key = "template-1",
+                Type = NotificationType.Email,
+                Name = "Template 1",
                 Subject = "Subject 1",
-                BodyTemplate = "Body 1",
+                Body = "Body 1",
                 IsActive = true
             },
             new NotificationTemplate
             {
-                TemplateKey = "template-2",
-                NotificationType = NotificationType.SMS,
-                TemplateName = "Template 2",
+                Key = "template-2",
+                Type = NotificationType.SMS,
+                Name = "Template 2",
                 Subject = string.Empty,
-                BodyTemplate = "Body 2",
+                Body = "Body 2",
                 IsActive = false
             }
         };

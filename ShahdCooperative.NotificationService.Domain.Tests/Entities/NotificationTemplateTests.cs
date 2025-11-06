@@ -14,10 +14,10 @@ public class NotificationTemplateTests
 
         // Assert
         template.Id.Should().Be(Guid.Empty);
-        template.TemplateKey.Should().BeEmpty();
-        template.TemplateName.Should().BeEmpty();
-        template.Subject.Should().BeEmpty();
-        template.BodyTemplate.Should().BeEmpty();
+        template.Key.Should().BeEmpty();
+        template.Name.Should().BeEmpty();
+        template.Subject.Should().BeNull();
+        template.Body.Should().BeEmpty();
         template.IsActive.Should().BeTrue();
         template.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
         template.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
@@ -38,21 +38,21 @@ public class NotificationTemplateTests
         var template = new NotificationTemplate
         {
             Id = id,
-            TemplateKey = templateKey,
-            TemplateName = templateName,
+            Key = templateKey,
+            Name = templateName,
             Subject = subject,
-            BodyTemplate = bodyTemplate,
-            NotificationType = notificationType,
+            Body = bodyTemplate,
+            Type = notificationType,
             IsActive = false
         };
 
         // Assert
         template.Id.Should().Be(id);
-        template.TemplateKey.Should().Be(templateKey);
-        template.TemplateName.Should().Be(templateName);
+        template.Key.Should().Be(templateKey);
+        template.Name.Should().Be(templateName);
         template.Subject.Should().Be(subject);
-        template.BodyTemplate.Should().Be(bodyTemplate);
-        template.NotificationType.Should().Be(notificationType);
+        template.Body.Should().Be(bodyTemplate);
+        template.Type.Should().Be(notificationType);
         template.IsActive.Should().BeFalse();
     }
 
@@ -62,15 +62,15 @@ public class NotificationTemplateTests
     [InlineData(NotificationType.Push)]
     [InlineData(NotificationType.InApp)]
     [InlineData(NotificationType.All)]
-    public void NotificationTemplate_Should_Support_All_NotificationTypes(NotificationType type)
+    public void NotificationTemplate_Should_Support_All_Types(NotificationType type)
     {
         // Arrange & Act
         var template = new NotificationTemplate
         {
-            NotificationType = type
+            Type = type
         };
 
         // Assert
-        template.NotificationType.Should().Be(type);
+        template.Type.Should().Be(type);
     }
 }

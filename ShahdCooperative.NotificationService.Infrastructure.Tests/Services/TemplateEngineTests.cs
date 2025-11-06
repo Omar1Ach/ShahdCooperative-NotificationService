@@ -44,10 +44,10 @@ public class TemplateEngineTests
         var template = new NotificationTemplate
         {
             Id = Guid.NewGuid(),
-            TemplateKey = "welcome-email",
-            NotificationType = NotificationType.Email,
+            Key = "welcome-email",
+            Type = NotificationType.Email,
             Subject = "Welcome {{UserName}}",
-            BodyTemplate = "Hello {{UserName}}, welcome to {{CompanyName}}!",
+            Body = "Hello {{UserName}}, welcome to {{CompanyName}}!",
             IsActive = true
         };
 
@@ -78,10 +78,10 @@ public class TemplateEngineTests
         var template = new NotificationTemplate
         {
             Id = Guid.NewGuid(),
-            TemplateKey = "inactive-template",
-            NotificationType = NotificationType.Email,
+            Key = "inactive-template",
+            Type = NotificationType.Email,
             Subject = "Test",
-            BodyTemplate = "Test Body",
+            Body = "Test Body",
             IsActive = false
         };
 
@@ -99,10 +99,10 @@ public class TemplateEngineTests
         var template = new NotificationTemplate
         {
             Id = Guid.NewGuid(),
-            TemplateKey = "test-template",
-            NotificationType = NotificationType.Email,
+            Key = "test-template",
+            Type = NotificationType.Email,
             Subject = "Test",
-            BodyTemplate = "Hello {{UserName}}",
+            Body = "Hello {{UserName}}",
             IsActive = true
         };
 
@@ -229,10 +229,10 @@ public class TemplateEngineTests
         var template = new NotificationTemplate
         {
             Id = Guid.NewGuid(),
-            TemplateKey = "simple-template",
-            NotificationType = NotificationType.Email,
+            Key = "simple-template",
+            Type = NotificationType.Email,
             Subject = "Test",
-            BodyTemplate = "Hello {{Name}}",
+            Body = "Hello {{Name}}",
             IsActive = true
         };
 
@@ -251,10 +251,10 @@ public class TemplateEngineTests
         var template = new NotificationTemplate
         {
             Id = Guid.NewGuid(),
-            TemplateKey = "static-template",
-            NotificationType = NotificationType.Email,
+            Key = "static-template",
+            Type = NotificationType.Email,
             Subject = "Test",
-            BodyTemplate = "This is a static message",
+            Body = "This is a static message",
             IsActive = true
         };
 

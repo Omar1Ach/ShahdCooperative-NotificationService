@@ -17,11 +17,11 @@ public class CreateTemplateCommandHandler : IRequestHandler<CreateTemplateComman
     {
         var template = new NotificationTemplate
         {
-            TemplateKey = request.TemplateKey,
-            NotificationType = request.NotificationType,
-            TemplateName = request.TemplateName,
-            Subject = request.Subject ?? string.Empty,
-            BodyTemplate = request.BodyTemplate,
+            Key = request.TemplateKey,
+            Type = request.NotificationType,
+            Name = request.TemplateName,
+            Subject = request.Subject,
+            Body = request.BodyTemplate,
             IsActive = request.IsActive
         };
 

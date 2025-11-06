@@ -14,7 +14,7 @@ public class MarkAsReadCommandHandler : IRequestHandler<MarkAsReadCommand, bool>
 
     public async Task<bool> Handle(MarkAsReadCommand request, CancellationToken cancellationToken)
     {
-        await _inAppRepository.MarkAsReadAsync(request.NotificationId, cancellationToken);
-        return true;
+        var rowsAffected = await _inAppRepository.MarkAsReadAsync(request.NotificationId, cancellationToken);
+        return rowsAffected > 0;
     }
 }
