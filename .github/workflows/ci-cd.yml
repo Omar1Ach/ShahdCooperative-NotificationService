@@ -31,42 +31,60 @@ jobs:
       run: |
         Write-Host "Setting up SQL Server for tests..."
 
-        # GitHub Actions has SQL Server 2019 pre-installed
-        # Enable TCP/IP and start the service
-        $instanceName = "MSSQLSERVER"
+        # List all SQL Server services
+        Write-Host "Available SQL Server services:"
+        Get-Service -Name "*SQL*" | Format-Table -AutoSize
 
-        # Get SQL Server services
-        Get-Service -Name "MSSQL*" | Format-Table -AutoSize
+        # Find and start SQL Server service
+        $sqlService = Get-Service -Name "MSSQL*" -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "MSSQL*" } | Select-Object -First 1
 
-        # Test connection to SQL Server Express
-        $connectionString = "Server=localhost;Database=master;Integrated Security=true;TrustServerCertificate=true;Connection Timeout=30;"
-        Write-Host "Testing connection with: $connectionString"
+        if ($sqlService) {
+            Write-Host "Found SQL Server service: $($sqlService.Name)"
+            Write-Host "Current status: $($sqlService.Status)"
 
-        $maxAttempts = 5
-        $attempt = 0
+            if ($sqlService.Status -ne "Running") {
+                Write-Host "Starting SQL Server service..."
+                Start-Service $sqlService.Name
+                Start-Sleep -Seconds 10
+                $sqlService.Refresh()
+                Write-Host "Service status after start: $($sqlService.Status)"
+            } else {
+                Write-Host "SQL Server is already running"
+            }
+        } else {
+            Write-Host "No SQL Server service found, trying to use SQL Server 2019 Express..."
+        }
+
+        # Try multiple connection string formats
+        $connectionStrings = @(
+            "Server=localhost;Database=master;Integrated Security=true;TrustServerCertificate=true;Connection Timeout=30;",
+            "Server=(local);Database=master;Integrated Security=true;TrustServerCertificate=true;Connection Timeout=30;",
+            "Server=.\SQL2019;Database=master;Integrated Security=true;TrustServerCertificate=true;Connection Timeout=30;",
+            "Server=localhost\SQL2019;Database=master;Integrated Security=true;TrustServerCertificate=true;Connection Timeout=30;"
+        )
+
         $connected = $false
-
-        while (-not $connected -and $attempt -lt $maxAttempts) {
-            $attempt++
-            Write-Host "Connection attempt $attempt of $maxAttempts..."
+        foreach ($connStr in $connectionStrings) {
+            Write-Host "`nTrying connection string: $connStr"
             try {
-                $connection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
+                $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
                 $connection.Open()
                 Write-Host "✓ Successfully connected to SQL Server!"
+                $env:TEST_CONNECTION_STRING = $connStr
+                Write-Host "Using connection string: $connStr"
                 $connection.Close()
                 $connected = $true
+                break
             } catch {
-                Write-Host "✗ Connection attempt $attempt failed: $_"
-                if ($attempt -lt $maxAttempts) {
-                    Write-Host "Waiting 5 seconds before retry..."
-                    Start-Sleep -Seconds 5
-                } else {
-                    throw "Failed to connect to SQL Server after $maxAttempts attempts"
-                }
+                Write-Host "✗ Failed: $_"
             }
         }
 
-        Write-Host "SQL Server is ready!"
+        if (-not $connected) {
+            throw "Failed to connect to SQL Server with any connection string"
+        }
+
+        Write-Host "`nSQL Server is ready!"
       shell: pwsh
 
     - name: Set SQL Server connection environment variable
