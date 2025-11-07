@@ -20,7 +20,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
     public CustomWebApplicationFactory()
     {
         // Set connection string in constructor so it's available during ConfigureWebHost
-        _connectionString = $"Server=(localdb)\\mssqllocaldb;Database={_databaseName};Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+        // Using MSSQLLocalDB (with proper casing) to match the LocalDB instance name
+        _connectionString = $"Server=(localdb)\\MSSQLLocalDB;Database={_databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=True;Connection Timeout=30";
     }
 
     async Task IAsyncLifetime.InitializeAsync()
@@ -44,7 +45,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
 
     private async Task CreateDatabaseAsync()
     {
-        var masterConnectionString = "Server=(localdb)\\mssqllocaldb;Database=master;Trusted_Connection=True;TrustServerCertificate=True";
+        var masterConnectionString = "Server=(localdb)\\MSSQLLocalDB;Database=master;Integrated Security=true;TrustServerCertificate=True;Connection Timeout=30";
         await using var connection = new SqlConnection(masterConnectionString);
         await connection.OpenAsync();
 
@@ -57,7 +58,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
     {
         try
         {
-            var masterConnectionString = "Server=(localdb)\\mssqllocaldb;Database=master;Trusted_Connection=True;TrustServerCertificate=True";
+            var masterConnectionString = "Server=(localdb)\\MSSQLLocalDB;Database=master;Integrated Security=true;TrustServerCertificate=True;Connection Timeout=30";
             await using var connection = new SqlConnection(masterConnectionString);
             await connection.OpenAsync();
 

@@ -30,12 +30,37 @@ jobs:
     - name: Initialize SQL Server LocalDB
       run: |
         Write-Host "Initializing LocalDB..."
-        # Stop and delete if exists, then create fresh
+
+        # Create and start a fresh LocalDB instance
         sqllocaldb stop MSSQLLocalDB -ErrorAction SilentlyContinue
         sqllocaldb delete MSSQLLocalDB -ErrorAction SilentlyContinue
-        sqllocaldb create MSSQLLocalDB
-        sqllocaldb start MSSQLLocalDB
+        sqllocaldb create MSSQLLocalDB -s
+
+        # Wait for LocalDB to be fully ready
+        Start-Sleep -Seconds 5
+
+        # Get instance info
         sqllocaldb info MSSQLLocalDB
+
+        # Get the pipe name for the instance
+        $instanceInfo = sqllocaldb info MSSQLLocalDB
+        Write-Host "LocalDB Instance Info:"
+        Write-Host $instanceInfo
+
+        # Test connection to master database
+        $connectionString = "Server=(localdb)\MSSQLLocalDB;Database=master;Integrated Security=true;Connection Timeout=30;"
+        Write-Host "Testing connection with: $connectionString"
+
+        try {
+            $connection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
+            $connection.Open()
+            Write-Host "✓ Successfully connected to LocalDB!"
+            $connection.Close()
+        } catch {
+            Write-Host "✗ Failed to connect to LocalDB: $_"
+            throw
+        }
+
         Write-Host "LocalDB is ready!"
       shell: pwsh
 
