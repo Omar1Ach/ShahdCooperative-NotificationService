@@ -1,65 +1,49 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
 using ShahdCooperative.NotificationService.Domain.Entities;
+using ShahdCooperative.NotificationService.Domain.Enums;
+using ShahdCooperative.NotificationService.Domain.Interfaces;
 
 namespace ShahdCooperative.NotificationService.IntegrationTests.Controllers;
 
-[Collection("Sequential")]
-public class InAppNotificationsControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory>, IAsyncLifetime
+[Collection("IntegrationTests")]
+public class InAppNotificationsControllerIntegrationTests : IntegrationTestBase
 {
-    private readonly HttpClient _client;
-    private readonly CustomWebApplicationFactory _factory;
-
-    public InAppNotificationsControllerIntegrationTests(CustomWebApplicationFactory factory)
+    public InAppNotificationsControllerIntegrationTests(CustomWebApplicationFactory factory) : base(factory)
     {
-        _factory = factory;
-        _client = factory.CreateClient();
-    }
-
-    public async Task InitializeAsync()
-    {
-        await _factory.InitializeDatabaseAsync();
-    }
-
-    public async Task DisposeAsync()
-    {
-        await _factory.CleanupDatabaseAsync();
     }
 
     private async Task<Guid> CreateInAppNotificationAsync(Guid userId, string title, string message, bool isRead = false)
     {
-        var notificationId = Guid.NewGuid();
-        using var connection = new SqlConnection(_factory.ConnectionString);
-        await connection.OpenAsync();
+        // Use the repository from DI container to ensure same connection handling
+        using var scope = Factory.Services.CreateScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IInAppNotificationRepository>();
 
-        await using var command = connection.CreateCommand();
-        command.CommandText = @"
-            INSERT INTO [Notification].[InAppNotifications]
-            (Id, UserId, Title, Message, Type, IsRead, CreatedAt)
-            VALUES (@Id, @UserId, @Title, @Message, @Type, @IsRead, @CreatedAt)";
+        var notification = new InAppNotification
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            Title = title,
+            Message = message,
+            Type = InAppNotificationType.Info,
+            IsRead = isRead,
+            CreatedAt = DateTime.UtcNow
+        };
 
-        command.Parameters.AddWithValue("@Id", notificationId);
-        command.Parameters.AddWithValue("@UserId", userId);
-        command.Parameters.AddWithValue("@Title", title);
-        command.Parameters.AddWithValue("@Message", message);
-        command.Parameters.AddWithValue("@Type", "Info");
-        command.Parameters.AddWithValue("@IsRead", isRead);
-        command.Parameters.AddWithValue("@CreatedAt", DateTime.UtcNow);
-
-        await command.ExecuteNonQueryAsync();
+        var notificationId = await repository.CreateAsync(notification);
         return notificationId;
     }
 
     [Fact]
     public async Task GetUserNotifications_WithNoNotifications_ReturnsEmptyList()
     {
-        // Arrange
-        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        // Arrange - Use unique user ID for this test
+        var userId = Guid.NewGuid();
 
         // Act
-        var response = await _client.GetAsync($"/api/inappnotifications/user/{userId}");
+        var response = await Client.GetAsync($"/api/inappnotifications/user/{userId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -71,13 +55,13 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
     [Fact]
     public async Task GetUserNotifications_WithExistingNotifications_ReturnsNotifications()
     {
-        // Arrange
-        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        // Arrange - Use unique user ID for this test
+        var userId = Guid.NewGuid();
         await CreateInAppNotificationAsync(userId, "Test Notification 1", "Message 1");
         await CreateInAppNotificationAsync(userId, "Test Notification 2", "Message 2");
 
         // Act
-        var response = await _client.GetAsync($"/api/inappnotifications/user/{userId}");
+        var response = await Client.GetAsync($"/api/inappnotifications/user/{userId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -89,15 +73,15 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
     [Fact]
     public async Task GetUserNotifications_WithPagination_ReturnsPagedResults()
     {
-        // Arrange
-        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        // Arrange - Use unique user ID for this test
+        var userId = Guid.NewGuid();
         for (int i = 1; i <= 25; i++)
         {
             await CreateInAppNotificationAsync(userId, $"Notification {i}", $"Message {i}");
         }
 
         // Act
-        var response = await _client.GetAsync($"/api/inappnotifications/user/{userId}?pageNumber=1&pageSize=10");
+        var response = await Client.GetAsync($"/api/inappnotifications/user/{userId}?pageNumber=1&pageSize=10");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -109,12 +93,12 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
     [Fact]
     public async Task GetUnreadCount_WithNoUnreadNotifications_ReturnsZero()
     {
-        // Arrange
-        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        // Arrange - Use unique user ID for this test
+        var userId = Guid.NewGuid();
         await CreateInAppNotificationAsync(userId, "Read Notification", "Message", isRead: true);
 
         // Act
-        var response = await _client.GetAsync($"/api/inappnotifications/user/{userId}/unread-count");
+        var response = await Client.GetAsync($"/api/inappnotifications/user/{userId}/unread-count");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -126,14 +110,14 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
     [Fact]
     public async Task GetUnreadCount_WithUnreadNotifications_ReturnsCorrectCount()
     {
-        // Arrange
-        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        // Arrange - Use unique user ID for this test
+        var userId = Guid.NewGuid();
         await CreateInAppNotificationAsync(userId, "Unread 1", "Message 1", isRead: false);
         await CreateInAppNotificationAsync(userId, "Unread 2", "Message 2", isRead: false);
         await CreateInAppNotificationAsync(userId, "Read 1", "Message 3", isRead: true);
 
         // Act
-        var response = await _client.GetAsync($"/api/inappnotifications/user/{userId}/unread-count");
+        var response = await Client.GetAsync($"/api/inappnotifications/user/{userId}/unread-count");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -145,12 +129,12 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
     [Fact]
     public async Task MarkAsRead_WithExistingNotification_ReturnsNoContent()
     {
-        // Arrange
-        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        // Arrange - Use unique user ID for this test
+        var userId = Guid.NewGuid();
         var notificationId = await CreateInAppNotificationAsync(userId, "Test", "Message", isRead: false);
 
         // Act
-        var response = await _client.PutAsync($"/api/inappnotifications/{notificationId}/mark-read", null);
+        var response = await Client.PutAsync($"/api/inappnotifications/{notificationId}/mark-read", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -163,7 +147,7 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
         var notificationId = Guid.NewGuid();
 
         // Act
-        var response = await _client.PutAsync($"/api/inappnotifications/{notificationId}/mark-read", null);
+        var response = await Client.PutAsync($"/api/inappnotifications/{notificationId}/mark-read", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -172,13 +156,13 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
     [Fact]
     public async Task MarkAllAsRead_WithExistingNotifications_ReturnsNoContent()
     {
-        // Arrange
-        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        // Arrange - Use unique user ID for this test
+        var userId = Guid.NewGuid();
         await CreateInAppNotificationAsync(userId, "Unread 1", "Message 1", isRead: false);
         await CreateInAppNotificationAsync(userId, "Unread 2", "Message 2", isRead: false);
 
         // Act
-        var response = await _client.PutAsync($"/api/inappnotifications/user/{userId}/mark-all-read", null);
+        var response = await Client.PutAsync($"/api/inappnotifications/user/{userId}/mark-all-read", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -187,11 +171,11 @@ public class InAppNotificationsControllerIntegrationTests : IClassFixture<Custom
     [Fact]
     public async Task MarkAllAsRead_WithNoNotifications_ReturnsNotFound()
     {
-        // Arrange
-        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        // Arrange - Use unique user ID for this test
+        var userId = Guid.NewGuid();
 
         // Act
-        var response = await _client.PutAsync($"/api/inappnotifications/user/{userId}/mark-all-read", null);
+        var response = await Client.PutAsync($"/api/inappnotifications/user/{userId}/mark-all-read", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

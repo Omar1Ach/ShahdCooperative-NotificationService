@@ -6,27 +6,15 @@ using ShahdCooperative.NotificationService.Domain.Enums;
 
 namespace ShahdCooperative.NotificationService.IntegrationTests.Controllers;
 
-[Collection("Sequential")]
-public class NotificationsControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory>, IAsyncLifetime
+[Collection("IntegrationTests")]
+public class NotificationsControllerIntegrationTests : IntegrationTestBase 
 {
-    private readonly HttpClient _client;
-    private readonly CustomWebApplicationFactory _factory;
 
-    public NotificationsControllerIntegrationTests(CustomWebApplicationFactory factory)
+    public NotificationsControllerIntegrationTests(CustomWebApplicationFactory factory) : base(factory)
     {
-        _factory = factory;
-        _client = factory.CreateClient();
     }
 
-    public async Task InitializeAsync()
-    {
-        await _factory.InitializeDatabaseAsync();
-    }
 
-    public async Task DisposeAsync()
-    {
-        await _factory.CleanupDatabaseAsync();
-    }
 
     [Fact]
     public async Task SendNotification_WithValidEmailData_ReturnsOk()
@@ -42,7 +30,7 @@ public class NotificationsControllerIntegrationTests : IClassFixture<CustomWebAp
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/notifications/send", command);
+        var response = await Client.PostAsJsonAsync("/api/notifications/send", command);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -65,7 +53,7 @@ public class NotificationsControllerIntegrationTests : IClassFixture<CustomWebAp
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/notifications/send", command);
+        var response = await Client.PostAsJsonAsync("/api/notifications/send", command);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -88,7 +76,7 @@ public class NotificationsControllerIntegrationTests : IClassFixture<CustomWebAp
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/notifications/send", command);
+        var response = await Client.PostAsJsonAsync("/api/notifications/send", command);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -113,7 +101,7 @@ public class NotificationsControllerIntegrationTests : IClassFixture<CustomWebAp
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/notifications/send", command);
+        var response = await Client.PostAsJsonAsync("/api/notifications/send", command);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

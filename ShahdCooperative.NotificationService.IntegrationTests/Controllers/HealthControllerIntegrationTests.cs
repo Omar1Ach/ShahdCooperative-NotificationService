@@ -3,33 +3,21 @@ using FluentAssertions;
 
 namespace ShahdCooperative.NotificationService.IntegrationTests.Controllers;
 
-[Collection("Sequential")]
-public class HealthControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory>, IAsyncLifetime
+[Collection("IntegrationTests")]
+public class HealthControllerIntegrationTests : IntegrationTestBase 
 {
-    private readonly HttpClient _client;
-    private readonly CustomWebApplicationFactory _factory;
 
-    public HealthControllerIntegrationTests(CustomWebApplicationFactory factory)
+    public HealthControllerIntegrationTests(CustomWebApplicationFactory factory) : base(factory)
     {
-        _factory = factory;
-        _client = factory.CreateClient();
     }
 
-    public async Task InitializeAsync()
-    {
-        await _factory.InitializeDatabaseAsync();
-    }
 
-    public async Task DisposeAsync()
-    {
-        await _factory.CleanupDatabaseAsync();
-    }
 
     [Fact]
     public async Task Health_ReturnsOk()
     {
         // Act
-        var response = await _client.GetAsync("/api/health");
+        var response = await Client.GetAsync("/api/health");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

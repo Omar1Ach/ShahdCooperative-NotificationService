@@ -6,30 +6,74 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using ShahdCooperative.NotificationService.Domain.Interfaces;
-using Testcontainers.MsSql;
 
 namespace ShahdCooperative.NotificationService.IntegrationTests;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private readonly MsSqlContainer _msSqlContainer = new MsSqlBuilder()
-        .WithImage("mcr.microsoft.com/mssql/server:2019-latest")
-        .WithPassword("YourStrong@Passw0rd123")
-        .Build();
-
-    private string _connectionString = string.Empty;
+    private readonly string _databaseName = $"TestDb_{Guid.NewGuid():N}";
+    private readonly string _connectionString;
+    private bool _isInitialized = false;
 
     public string ConnectionString => _connectionString;
 
+    public CustomWebApplicationFactory()
+    {
+        // Set connection string in constructor so it's available during ConfigureWebHost
+        _connectionString = $"Server=(localdb)\\mssqllocaldb;Database={_databaseName};Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+    }
+
     async Task IAsyncLifetime.InitializeAsync()
     {
-        await _msSqlContainer.StartAsync();
-        _connectionString = _msSqlContainer.GetConnectionString();
+        if (_isInitialized) return;
+
+        // Create the database
+        await CreateDatabaseAsync();
+
+        // Initialize the database schema
+        await InitializeDatabaseAsync();
+
+        _isInitialized = true;
     }
 
     async Task IAsyncLifetime.DisposeAsync()
     {
-        await _msSqlContainer.DisposeAsync();
+        // Clean up the test database
+        await DropDatabaseAsync();
+    }
+
+    private async Task CreateDatabaseAsync()
+    {
+        var masterConnectionString = "Server=(localdb)\\mssqllocaldb;Database=master;Trusted_Connection=True;TrustServerCertificate=True";
+        await using var connection = new SqlConnection(masterConnectionString);
+        await connection.OpenAsync();
+
+        await using var command = connection.CreateCommand();
+        command.CommandText = $"IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = N'{_databaseName}') CREATE DATABASE [{_databaseName}]";
+        await command.ExecuteNonQueryAsync();
+    }
+
+    private async Task DropDatabaseAsync()
+    {
+        try
+        {
+            var masterConnectionString = "Server=(localdb)\\mssqllocaldb;Database=master;Trusted_Connection=True;TrustServerCertificate=True";
+            await using var connection = new SqlConnection(masterConnectionString);
+            await connection.OpenAsync();
+
+            await using var command = connection.CreateCommand();
+            command.CommandText = $@"
+                IF EXISTS (SELECT * FROM sys.databases WHERE name = N'{_databaseName}')
+                BEGIN
+                    ALTER DATABASE [{_databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+                    DROP DATABASE [{_databaseName}];
+                END";
+            await command.ExecuteNonQueryAsync();
+        }
+        catch
+        {
+            // Ignore cleanup errors
+        }
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -63,8 +107,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
 
     public async Task InitializeDatabaseAsync()
     {
-        // Initialize database schema
-        using var connection = new SqlConnection(_connectionString);
+        await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();
 
         // Run the initialization script
@@ -79,36 +122,11 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
 
     private async Task InitializeDatabaseSchemaAsync(SqlConnection connection)
     {
-        var scriptPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "scripts", "init-db.sql");
-
-        if (!File.Exists(scriptPath))
-        {
-            // Fallback: create schemas manually
-            await CreateSchemasManuallyAsync(connection);
-            return;
-        }
-
-        var script = await File.ReadAllTextAsync(scriptPath);
-        var batches = script.Split(new[] { "GO", "go" }, StringSplitOptions.RemoveEmptyEntries);
-
-        foreach (var batch in batches)
-        {
-            if (string.IsNullOrWhiteSpace(batch)) continue;
-
-            try
-            {
-                await using var command = connection.CreateCommand();
-                command.CommandText = batch;
-                await command.ExecuteNonQueryAsync();
-            }
-            catch
-            {
-                // Ignore errors (schema might already exist)
-            }
-        }
+        // Create schemas and tables
+        await CreateSchemasAndTablesAsync(connection);
     }
 
-    private async Task CreateSchemasManuallyAsync(SqlConnection connection)
+    private async Task CreateSchemasAndTablesAsync(SqlConnection connection)
     {
         var commands = new[]
         {
@@ -189,6 +207,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
                   Title NVARCHAR(255) NOT NULL,
                   Message NVARCHAR(MAX) NOT NULL,
                   [Type] NVARCHAR(50) NOT NULL,
+                  Category NVARCHAR(50) NULL,
+                  ActionUrl NVARCHAR(500) NULL,
                   IsRead BIT NOT NULL DEFAULT 0,
                   ReadAt DATETIME2 NULL,
                   CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
@@ -216,9 +236,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
                 command.CommandText = commandText;
                 await command.ExecuteNonQueryAsync();
             }
-            catch
+            catch (Exception ex)
             {
-                // Ignore errors (objects might already exist)
+                // Log but don't fail
+                Console.WriteLine($"Error creating schema/table: {ex.Message}");
             }
         }
     }
@@ -251,15 +272,17 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
                 command.Parameters.AddWithValue("@Role", "Customer");
                 await command.ExecuteNonQueryAsync();
             }
-            catch
+            catch (Exception ex)
             {
-                // Ignore if user creation fails
+                // Log but don't fail
+                Console.WriteLine($"Error creating test user: {ex.Message}");
             }
         }
     }
 
     private async Task CleanDatabaseTablesAsync(SqlConnection connection)
     {
+        // Clean tables in correct order to handle foreign key constraints
         var tables = new[]
         {
             "[Notification].[DeviceTokens]",
@@ -276,20 +299,40 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
             {
                 await using var command = connection.CreateCommand();
                 command.CommandText = $"DELETE FROM {table}";
-                await command.ExecuteNonQueryAsync();
+                var rowsAffected = await command.ExecuteNonQueryAsync();
+                if (rowsAffected > 0)
+                {
+                    Console.WriteLine($"[CLEANUP] Deleted {rowsAffected} rows from {table}");
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                // Table might not exist yet, ignore
+                Console.WriteLine($"[CLEANUP ERROR] Failed to clean {table}: {ex.Message}");
             }
         }
     }
 
     public async Task CleanupDatabaseAsync()
     {
-        // Clean tables after tests
-        using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync();
-        await CleanDatabaseTablesAsync(connection);
+        // Clean tables after tests with retry logic
+        const int maxRetries = 3;
+        for (int i = 0; i < maxRetries; i++)
+        {
+            try
+            {
+                await using var connection = new SqlConnection(_connectionString);
+                await connection.OpenAsync();
+                await CleanDatabaseTablesAsync(connection);
+                break; // Success
+            }
+            catch (Exception ex)
+            {
+                if (i == maxRetries - 1)
+                {
+                    Console.WriteLine($"Failed to cleanup database after {maxRetries} attempts: {ex.Message}");
+                }
+                await Task.Delay(100); // Wait before retry
+            }
+        }
     }
 }

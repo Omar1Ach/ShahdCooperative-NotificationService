@@ -6,36 +6,24 @@ using ShahdCooperative.NotificationService.Domain.Entities;
 
 namespace ShahdCooperative.NotificationService.IntegrationTests.Controllers;
 
-[Collection("Sequential")]
-public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory>, IAsyncLifetime
+[Collection("IntegrationTests")]
+public class UserPreferencesControllerIntegrationTests : IntegrationTestBase 
 {
-    private readonly HttpClient _client;
-    private readonly CustomWebApplicationFactory _factory;
 
-    public UserPreferencesControllerIntegrationTests(CustomWebApplicationFactory factory)
+    public UserPreferencesControllerIntegrationTests(CustomWebApplicationFactory factory) : base(factory)
     {
-        _factory = factory;
-        _client = factory.CreateClient();
     }
 
-    public async Task InitializeAsync()
-    {
-        await _factory.InitializeDatabaseAsync();
-    }
 
-    public async Task DisposeAsync()
-    {
-        await _factory.CleanupDatabaseAsync();
-    }
 
     [Fact]
     public async Task GetUserPreferences_WithNonExistingUser_ReturnsNotFound()
     {
-        // Arrange
-        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        // Arrange - Use a user ID that doesn't exist in the database
+        var userId = Guid.Parse("99999999-9999-9999-9999-999999999999");
 
         // Act
-        var response = await _client.GetAsync($"/api/userpreferences/{userId}");
+        var response = await Client.GetAsync($"/api/userpreferences/{userId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -44,8 +32,8 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
     [Fact]
     public async Task CreateUserPreferences_WithValidData_ReturnsCreated()
     {
-        // Arrange - Use predefined test user ID
-        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        // Arrange - Use unique user ID for this test
+        var userId = Guid.NewGuid();
         var command = new CreateUserPreferenceCommand
         {
             UserId = userId,
@@ -56,7 +44,7 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/userpreferences", command);
+        var response = await Client.PostAsJsonAsync("/api/userpreferences", command);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -66,8 +54,8 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
     [Fact]
     public async Task GetUserPreferences_WithExistingUser_ReturnsPreferences()
     {
-        // Arrange - Create preferences first with predefined test user ID
-        var userId = Guid.Parse("00000000-0000-0000-0000-000000000002");
+        // Arrange - Create preferences first with unique user ID
+        var userId = Guid.NewGuid();
         var createCommand = new CreateUserPreferenceCommand
         {
             UserId = userId,
@@ -76,10 +64,10 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
             PushEnabled = true,
             InAppEnabled = false
         };
-        await _client.PostAsJsonAsync("/api/userpreferences", createCommand);
+        await Client.PostAsJsonAsync("/api/userpreferences", createCommand);
 
         // Act
-        var response = await _client.GetAsync($"/api/userpreferences/{userId}");
+        var response = await Client.GetAsync($"/api/userpreferences/{userId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -95,8 +83,8 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
     [Fact]
     public async Task UpdateUserPreferences_WithValidData_ReturnsNoContent()
     {
-        // Arrange - Create preferences first
-        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        // Arrange - Create preferences first with unique user ID
+        var userId = Guid.NewGuid();
         var createCommand = new CreateUserPreferenceCommand
         {
             UserId = userId,
@@ -105,7 +93,7 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
             PushEnabled = true,
             InAppEnabled = true
         };
-        await _client.PostAsJsonAsync("/api/userpreferences", createCommand);
+        await Client.PostAsJsonAsync("/api/userpreferences", createCommand);
 
         var updateCommand = new UpdateUserPreferenceCommand
         {
@@ -117,13 +105,13 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/userpreferences/{userId}", updateCommand);
+        var response = await Client.PutAsJsonAsync($"/api/userpreferences/{userId}", updateCommand);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         // Verify update
-        var getResponse = await _client.GetAsync($"/api/userpreferences/{userId}");
+        var getResponse = await Client.GetAsync($"/api/userpreferences/{userId}");
         var preferences = await getResponse.Content.ReadFromJsonAsync<NotificationPreference>();
         preferences!.EmailEnabled.Should().BeFalse();
         preferences.SmsEnabled.Should().BeFalse();
@@ -147,7 +135,7 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/userpreferences/{userId2}", updateCommand);
+        var response = await Client.PutAsJsonAsync($"/api/userpreferences/{userId2}", updateCommand);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -156,8 +144,8 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
     [Fact]
     public async Task UpdateUserPreferences_WithNonExistingUser_ReturnsNotFound()
     {
-        // Arrange
-        var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        // Arrange - Use a user ID that doesn't exist in the database
+        var userId = Guid.Parse("99999999-9999-9999-9999-999999999999");
         var updateCommand = new UpdateUserPreferenceCommand
         {
             UserId = userId,
@@ -168,7 +156,7 @@ public class UserPreferencesControllerIntegrationTests : IClassFixture<CustomWeb
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/userpreferences/{userId}", updateCommand);
+        var response = await Client.PutAsJsonAsync($"/api/userpreferences/{userId}", updateCommand);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
