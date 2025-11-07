@@ -13,62 +13,29 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
 {
     private readonly string _databaseName = $"TestDb_{Guid.NewGuid():N}";
     private readonly string _connectionString;
+    private readonly bool _isCI;
     private bool _isInitialized = false;
 
     public string ConnectionString => _connectionString;
 
     public CustomWebApplicationFactory()
     {
-        // Set connection string in constructor so it's available during ConfigureWebHost
-        // Check if running in CI/CD environment (GitHub Actions uses SQL Server instead of LocalDB)
-        var useSqlServer = Environment.GetEnvironmentVariable("USE_SQLSERVER_FOR_TESTS");
+        // Detect CI environment (GitHub Actions)
+        _isCI = Environment.GetEnvironmentVariable("CI") == "true" ||
+                Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
 
-        if (!string.IsNullOrEmpty(useSqlServer) && useSqlServer.Equals("true", StringComparison.OrdinalIgnoreCase))
+        if (_isCI)
         {
-            // GitHub Actions CI/CD - use SQL Server 2019
-            // Try to detect which connection string works
-            _connectionString = GetWorkingConnectionString(_databaseName);
+            // GitHub Actions - use service container
+            _connectionString = $"Server=localhost,1433;Database={_databaseName};User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;Connection Timeout=30";
+            Console.WriteLine("[CI] Using GitHub Actions service container");
         }
         else
         {
             // Local development - use LocalDB
             _connectionString = $"Server=(localdb)\\MSSQLLocalDB;Database={_databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30";
+            Console.WriteLine("[LOCAL] Using LocalDB");
         }
-    }
-
-    private static string GetWorkingConnectionString(string databaseName)
-    {
-        // Try different SQL Server instance names commonly used in GitHub Actions, plus LocalDB
-        var connectionFormats = new[]
-        {
-            $"Server=localhost\\SQL2019;Database={databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30",
-            $"Server=(local)\\SQL2019;Database={databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30",
-            $"Server=localhost;Database={databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30",
-            $"Server=(local);Database={databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30",
-            $"Server=(localdb)\\MSSQLLocalDB;Database={databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30"
-        };
-
-        // For the master database connection check
-        foreach (var connStr in connectionFormats)
-        {
-            try
-            {
-                var masterConnStr = connStr.Replace($"Database={databaseName}", "Database=master");
-                using var connection = new SqlConnection(masterConnStr);
-                connection.Open();
-                connection.Close();
-                Console.WriteLine($"[CI] Using connection: {connStr}");
-                return connStr;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[CI] Failed to connect with: {connStr.Substring(0, Math.Min(50, connStr.Length))}... Error: {ex.Message}");
-            }
-        }
-
-        // Default fallback to LocalDB
-        Console.WriteLine($"[CI] Could not verify any connection, using fallback: LocalDB");
-        return $"Server=(localdb)\\MSSQLLocalDB;Database={databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30";
     }
 
     async Task IAsyncLifetime.InitializeAsync()
@@ -126,12 +93,16 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
 
     private string GetMasterConnectionString()
     {
-        // Extract server from the main connection string and use it for master database
-        var builder = new SqlConnectionStringBuilder(_connectionString)
+        if (_isCI)
         {
-            InitialCatalog = "master"
-        };
-        return builder.ConnectionString;
+            // GitHub Actions service container
+            return "Server=localhost,1433;Database=master;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;Connection Timeout=30";
+        }
+        else
+        {
+            // Local LocalDB
+            return "Server=(localdb)\\MSSQLLocalDB;Database=master;Integrated Security=true;TrustServerCertificate=true;Connection Timeout=30";
+        }
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
