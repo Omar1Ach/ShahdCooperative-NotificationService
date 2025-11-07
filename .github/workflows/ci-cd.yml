@@ -37,23 +37,11 @@ jobs:
       with:
         dotnet-version: '9.0.x'
 
-    - name: Wait for SQL Server
+    - name: Wait for SQL Server to start
       run: |
-        echo "Waiting for SQL Server to be ready..."
-        sleep 20
-
-        for i in {1..30}; do
-          if sqlcmd -S localhost -U sa -P 'Your_password123' -Q "SELECT 1" > /dev/null 2>&1; then
-            echo "✓ SQL Server is ready!"
-            sqlcmd -S localhost -U sa -P 'Your_password123' -Q "SELECT @@VERSION"
-            exit 0
-          fi
-          echo "Attempt $i/30: Waiting for SQL Server..."
-          sleep 3
-        done
-
-        echo "✗ SQL Server failed to start"
-        exit 1
+        echo "Waiting 30 seconds for SQL Server to initialize..."
+        sleep 30
+        echo "SQL Server should be ready. Tests will verify connection."
 
     - name: Restore dependencies
       run: dotnet restore
