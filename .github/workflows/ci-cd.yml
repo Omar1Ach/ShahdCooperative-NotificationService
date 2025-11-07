@@ -27,6 +27,18 @@ jobs:
       with:
         dotnet-version: '9.0.x'
 
+    - name: Initialize SQL Server LocalDB
+      run: |
+        Write-Host "Initializing LocalDB..."
+        # Stop and delete if exists, then create fresh
+        sqllocaldb stop MSSQLLocalDB -ErrorAction SilentlyContinue
+        sqllocaldb delete MSSQLLocalDB -ErrorAction SilentlyContinue
+        sqllocaldb create MSSQLLocalDB
+        sqllocaldb start MSSQLLocalDB
+        sqllocaldb info MSSQLLocalDB
+        Write-Host "LocalDB is ready!"
+      shell: pwsh
+
     - name: Restore dependencies
       run: dotnet restore
 
