@@ -1,0 +1,266 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  ShahdCooperative.NotificationService.Domain -> C:\Users\Predator\ShahdCooperativeProject\ShahdCooperative.NotificationService\ShahdCooperative.NotificationService.Domain\bin\Debug\net8.0\ShahdCooperative.NotificationService.Domain.dll
+  ShahdCooperative.NotificationService.Application -> C:\Users\Predator\ShahdCooperativeProject\ShahdCooperative.NotificationService\ShahdCooperative.NotificationService.Application\bin\Debug\net8.0\ShahdCooperative.NotificationService.Application.dll
+  ShahdCooperative.NotificationService.Infrastructure -> C:\Users\Predator\ShahdCooperativeProject\ShahdCooperative.NotificationService\ShahdCooperative.NotificationService.Infrastructure\bin\Debug\net8.0\ShahdCooperative.NotificationService.Infrastructure.dll
+  ShahdCooperative.NotificationService.API -> C:\Users\Predator\ShahdCooperativeProject\ShahdCooperative.NotificationService\ShahdCooperative.NotificationService.API\bin\Debug\net8.0\ShahdCooperative.NotificationService.API.dll
+  ShahdCooperative.NotificationService.IntegrationTests -> C:\Users\Predator\ShahdCooperativeProject\ShahdCooperative.NotificationService\ShahdCooperative.NotificationService.IntegrationTests\bin\Debug\net9.0\ShahdCooperative.NotificationService.IntegrationTests.dll
+Test run for C:\Users\Predator\ShahdCooperativeProject\ShahdCooperative.NotificationService\ShahdCooperative.NotificationService.IntegrationTests\bin\Debug\net9.0\ShahdCooperative.NotificationService.IntegrationTests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 17.14.1 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:05.26]     ShahdCooperative.NotificationService.IntegrationTests.Controllers.InAppNotificationsControllerIntegrationTests.GetUserNotifications_WithExistingNotifications_ReturnsNotifications [FAIL]
+  Failed ShahdCooperative.NotificationService.IntegrationTests.Controllers.InAppNotificationsControllerIntegrationTests.GetUserNotifications_WithExistingNotifications_ReturnsNotifications [147 ms]
+  Error Message:
+   Expected notifications to contain 2 item(s), but found 20: ShahdCooperative.NotificationService.Domain.Entities.InAppNotification
+    {
+        ActionUrl = <null>,
+        Category = <null>,
+        CreatedAt = <2025-11-07 10:55:12.2066667>,
+        ExpiresAt = <null>,
+        Id = {5f37c559-1e26-4fb4-a9da-caecb0282856},
+        IsExpired = False,
+        IsRead = False,
+        Message = "Message 2",
+        ReadAt = <null>,
+        Title = "Test Notification 2",
+        Type = InAppNotificationType.Info {value: 0},
+        UserId = {00000000-0000-0000-0000-000000000001}
+    },
+    ShahdCooperative.NotificationService.Domain.Entities.InAppNotification
+    {
+        ActionUrl = <null>,
+        Category = <null>,
+        CreatedAt = <2025-11-07 10:55:12.1933333>,
+        ExpiresAt = <null>,
+        Id = {e1d2ad3e-563e-494b-a528-da13691b5d86},
+        IsExpired = False,
+        IsRead = False,
+        Message = "Message 1",
+        ReadAt = <null>,
+        Title = "Test Notification 1",
+        Type = InAppNotificationType.Info {value: 0},
+        UserId = {00000000-0000-0000-0000-000000000001}
+    },
+    ShahdCooperative.NotificationService.Domain.Entities.InAppNotification
+    {
+        ActionUrl = <null>,
+        Category = <null>,
+        CreatedAt = <2025-11-07 10:55:11.660>,
+        ExpiresAt = <null>,
+        Id = {38f6fdca-24df-4ca6-9a6e-3b3ed9ebb007},
+        IsExpired = False,
+        IsRead = False,
+        Message = "Message 25",
+        ReadAt = <null>,
+        Title = "Notification 25",
+        Type = InAppNotificationType.Info {value: 0},
+        UserId = {00000000-0000-0000-0000-000000000001}
+    },
+    ShahdCooperative.NotificationService.Domain.Entities.InAppNotification
+    {
+        ActionUrl = <null>,
+        Category = <null>,
+        CreatedAt = <2025-11-07 10:55:11.6533333>,
+        ExpiresAt = <null>,
+        Id = {356b3085-3dbd-435f-9f28-bd6cb70f5656},
+        IsExpired = False,
+        IsRead = False,
+        Message = "Message 24",
+        ReadAt = <null>,
+        Title = "Notification 24",
+        Type = InAppNotificationType.Info {value: 0},
+        UserId = {00000000-0000-0000-0000-000000000001}
+    },
+    ShahdCooperative.NotificationService.Domain.Entities.InAppNotification
+    {
+        ActionUrl = <null>,
+        Category = <null>,
+        CreatedAt = <2025-11-07 10:55:11.6266667>,
+        ExpiresAt = <null>,
+        Id = {b04a80c9-d3fa-4a7a-8e50-c5117fc3712f},
+        IsExpired = False,
+        IsRead = False,
+        Message = "Message 23",
+        ReadAt = <null>,
+        Title = "Notification 23",
+        Type = InAppNotificationType.Info {value: 0},
+        UserId = {00000000-0000-0000-0000-000000000001}
+    },
+    ShahdCooperative.NotificationService.Domain.Entities.InAppNotification
+    {
+        ActionUrl = <null>,
+        Category = <null>,
+        CreatedAt = <2025-11-07 10:55:11.6066667>,
+        ExpiresAt = <null>,
+        Id = {a74f3e18-e8a8-4ae1-9e1a-fe490d066b8e},
+        IsExpired = False,
+        IsRead = False,
+        Message = "Message 22",
+        ReadAt = <null>,
+        Title = "Notification 22",
+        Type = InAppNotificationType.Info {value: 0},
+        UserId = {00000000-0000-0000-0000-000000000001}
+    }ShahdCooperative.NotificationService.Domain.Entities.InAppNotification
+    {
+        ActionUrl = <null>,
+        Category = <null>,
+        CreatedAt = <2025-11-07 10:55:11.5966667>,
+        ExpiresAt = <null>,
+        Id = {1edab8c5-b3c0-47b2-a33c-bae7187b98a6},
+        IsExpired = False,
+        IsRead = False,
+        Message = "Message 21",
+        ReadAt = <null>,
+
+
+(Output has exceeded the maximum of 100 lines. Increase FormattingOptions.MaxLines on AssertionScope or AssertionConfiguration to include more lines.).
+  Stack Trace:
+     at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.AddPreFormattedFailure(String formattedFailureMessage)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(String message, Object[] args)
+   at FluentAssertions.Collections.GenericCollectionAssertions`3.HaveCount(Int32 expected, String because, Object[] becauseArgs)
+   at ShahdCooperative.NotificationService.IntegrationTests.Controllers.InAppNotificationsControllerIntegrationTests.GetUserNotifications_WithExistingNotifications_ReturnsNotifications() in C:\Users\Predator\ShahdCooperativeProject\ShahdCooperative.NotificationService\ShahdCooperative.NotificationService.IntegrationTests\Controllers\InAppNotificationsControllerIntegrationTests.cs:line 70
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:07.44]     ShahdCooperative.NotificationService.IntegrationTests.Controllers.InAppNotificationsControllerIntegrationTests.GetUserNotifications_WithNoNotifications_ReturnsEmptyList [FAIL]
+  Failed ShahdCooperative.NotificationService.IntegrationTests.Controllers.InAppNotificationsControllerIntegrationTests.GetUserNotifications_WithNoNotifications_ReturnsEmptyList [96 ms]
+  Error Message:
+   Expected notifications to be empty, but found at least one item {
+    ShahdCooperative.NotificationService.Domain.Entities.InAppNotification
+    {
+        ActionUrl = <null>,
+        Category = <null>,
+        CreatedAt = <2025-11-07 10:55:13.970>,
+        ExpiresAt = <null>,
+        Id = {1026cc06-8ba8-4475-a945-53b24bba5aab},
+        IsExpired = False,
+        IsRead = True,
+        Message = "Message",
+        ReadAt = <null>,
+        Title = "Read Notification",
+        Type = InAppNotificationType.Info {value: 0},
+        UserId = {00000000-0000-0000-0000-000000000001}
+    }
+}.
+  Stack Trace:
+     at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.AddPreFormattedFailure(String formattedFailureMessage)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(String message, Object[] args)
+   at FluentAssertions.Execution.GivenSelector`1.FailWith(String message, Object[] args)
+   at FluentAssertions.Collections.GenericCollectionAssertions`3.<>c__DisplayClass10_0.<BeEmpty>b__0(AssertionChain chain)
+   at FluentAssertions.Execution.AssertionChain.WithExpectation(String message, Action`1 chain, Object[] args)
+   at FluentAssertions.Execution.AssertionChain.WithExpectation(String message, Action`1 chain)
+   at FluentAssertions.Collections.GenericCollectionAssertions`3.BeEmpty(String because, Object[] becauseArgs)
+   at ShahdCooperative.NotificationService.IntegrationTests.Controllers.InAppNotificationsControllerIntegrationTests.GetUserNotifications_WithNoNotifications_ReturnsEmptyList() in C:\Users\Predator\ShahdCooperativeProject\ShahdCooperative.NotificationService\ShahdCooperative.NotificationService.IntegrationTests\Controllers\InAppNotificationsControllerIntegrationTests.cs:line 52
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:08.01]     ShahdCooperative.NotificationService.IntegrationTests.Controllers.NotificationHistoryControllerIntegrationTests.GetNotificationHistory_ReturnsOnlyRecipientHistory [FAIL]
+[xUnit.net 00:00:08.70]     ShahdCooperative.NotificationService.IntegrationTests.Controllers.NotificationHistoryControllerIntegrationTests.GetNotificationHistory_WithExistingHistory_ReturnsHistory [FAIL]
+  Failed ShahdCooperative.NotificationService.IntegrationTests.Controllers.NotificationHistoryControllerIntegrationTests.GetNotificationHistory_ReturnsOnlyRecipientHistory [186 ms]
+  Error Message:
+   Expected history to contain 2 item(s), but found 0: {empty}.
+  Stack Trace:
+     at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.AddPreFormattedFailure(String formattedFailureMessage)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(String message, Object[] args)
+   at FluentAssertions.Collections.GenericCollectionAssertions`3.HaveCount(Int32 expected, String because, Object[] becauseArgs)
+   at ShahdCooperative.NotificationService.IntegrationTests.Controllers.NotificationHistoryControllerIntegrationTests.GetNotificationHistory_ReturnsOnlyRecipientHistory() in C:\Users\Predator\ShahdCooperativeProject\ShahdCooperative.NotificationService\ShahdCooperative.NotificationService.IntegrationTests\Controllers\NotificationHistoryControllerIntegrationTests.cs:line 99
+--- End of stack trace from previous location ---
+  Failed ShahdCooperative.NotificationService.IntegrationTests.Controllers.NotificationHistoryControllerIntegrationTests.GetNotificationHistory_WithExistingHistory_ReturnsHistory [214 ms]
+  Error Message:
+   Expected history to contain 3 item(s), but found 0: {empty}.
+  Stack Trace:
+     at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.AddPreFormattedFailure(String formattedFailureMessage)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(String message, Object[] args)
+   at FluentAssertions.Collections.GenericCollectionAssertions`3.HaveCount(Int32 expected, String because, Object[] becauseArgs)
+   at ShahdCooperative.NotificationService.IntegrationTests.Controllers.NotificationHistoryControllerIntegrationTests.GetNotificationHistory_WithExistingHistory_ReturnsHistory() in C:\Users\Predator\ShahdCooperativeProject\ShahdCooperative.NotificationService\ShahdCooperative.NotificationService.IntegrationTests\Controllers\NotificationHistoryControllerIntegrationTests.cs:line 78
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:11.90]     ShahdCooperative.NotificationService.IntegrationTests.Controllers.TemplatesControllerIntegrationTests.CreateTemplate_WithValidData_ReturnsCreated [FAIL]
+  Failed ShahdCooperative.NotificationService.IntegrationTests.Controllers.TemplatesControllerIntegrationTests.CreateTemplate_WithValidData_ReturnsCreated [36 ms]
+  Error Message:
+   Expected response.StatusCode to be HttpStatusCode.Created {value: 201}, but found HttpStatusCode.InternalServerError {value: 500}.
+  Stack Trace:
+     at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.AddPreFormattedFailure(String formattedFailureMessage)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(String message, Object[] args)
+   at FluentAssertions.Primitives.EnumAssertions`2.Be(TEnum expected, String because, Object[] becauseArgs)
+   at ShahdCooperative.NotificationService.IntegrationTests.Controllers.TemplatesControllerIntegrationTests.CreateTemplate_WithValidData_ReturnsCreated() in C:\Users\Predator\ShahdCooperativeProject\ShahdCooperative.NotificationService\ShahdCooperative.NotificationService.IntegrationTests\Controllers\TemplatesControllerIntegrationTests.cs:line 51
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:13.46]     ShahdCooperative.NotificationService.IntegrationTests.Controllers.TemplatesControllerIntegrationTests.GetAllTemplates_ReturnsEmptyList_WhenNoTemplates [FAIL]
+  Failed ShahdCooperative.NotificationService.IntegrationTests.Controllers.TemplatesControllerIntegrationTests.GetAllTemplates_ReturnsEmptyList_WhenNoTemplates [95 ms]
+  Error Message:
+   Expected templates to be empty, but found at least one item {
+    ShahdCooperative.NotificationService.Domain.Entities.NotificationTemplate
+    {
+        Body = "Test Body {{variable}}",
+        CreatedAt = <2025-11-07 09:11:02.8866667>,
+        Id = {3e298f2b-c9e9-4df0-b579-dec01bf8ff4b},
+        IsActive = True,
+        IsDeleted = False,
+        Key = "test-template",
+        Name = "Test Template",
+        Subject = "Test Subject",
+        Type = NotificationType.Email {value: 0},
+        UpdatedAt = <2025-11-07 09:11:02.8866667>
+    }
+}.
+  Stack Trace:
+     at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.AddPreFormattedFailure(String formattedFailureMessage)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(String message, Object[] args)
+   at FluentAssertions.Execution.GivenSelector`1.FailWith(String message, Object[] args)
+   at FluentAssertions.Collections.GenericCollectionAssertions`3.<>c__DisplayClass10_0.<BeEmpty>b__0(AssertionChain chain)
+   at FluentAssertions.Execution.AssertionChain.WithExpectation(String message, Action`1 chain, Object[] args)
+   at FluentAssertions.Execution.AssertionChain.WithExpectation(String message, Action`1 chain)
+   at FluentAssertions.Collections.GenericCollectionAssertions`3.BeEmpty(String because, Object[] becauseArgs)
+   at ShahdCooperative.NotificationService.IntegrationTests.Controllers.TemplatesControllerIntegrationTests.GetAllTemplates_ReturnsEmptyList_WhenNoTemplates() in C:\Users\Predator\ShahdCooperativeProject\ShahdCooperative.NotificationService\ShahdCooperative.NotificationService.IntegrationTests\Controllers\TemplatesControllerIntegrationTests.cs:line 30
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:14.52]     ShahdCooperative.NotificationService.IntegrationTests.Controllers.TemplatesControllerIntegrationTests.DeleteTemplate_WithExistingKey_ReturnsNoContent [FAIL]
+  Failed ShahdCooperative.NotificationService.IntegrationTests.Controllers.TemplatesControllerIntegrationTests.DeleteTemplate_WithExistingKey_ReturnsNoContent [20 ms]
+  Error Message:
+   Expected response.StatusCode to be HttpStatusCode.NoContent {value: 204}, but found HttpStatusCode.NotFound {value: 404}.
+  Stack Trace:
+     at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.AddPreFormattedFailure(String formattedFailureMessage)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(String message, Object[] args)
+   at FluentAssertions.Primitives.EnumAssertions`2.Be(TEnum expected, String because, Object[] becauseArgs)
+   at ShahdCooperative.NotificationService.IntegrationTests.Controllers.TemplatesControllerIntegrationTests.DeleteTemplate_WithExistingKey_ReturnsNoContent() in C:\Users\Predator\ShahdCooperativeProject\ShahdCooperative.NotificationService\ShahdCooperative.NotificationService.IntegrationTests\Controllers\TemplatesControllerIntegrationTests.cs:line 167
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:16.42]     ShahdCooperative.NotificationService.IntegrationTests.Controllers.UserPreferencesControllerIntegrationTests.CreateUserPreferences_WithValidData_ReturnsCreated [FAIL]
+  Failed ShahdCooperative.NotificationService.IntegrationTests.Controllers.UserPreferencesControllerIntegrationTests.CreateUserPreferences_WithValidData_ReturnsCreated [25 ms]
+  Error Message:
+   Expected response.StatusCode to be HttpStatusCode.Created {value: 201}, but found HttpStatusCode.InternalServerError {value: 500}.
+  Stack Trace:
+     at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.AddPreFormattedFailure(String formattedFailureMessage)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at FluentAssertions.Execution.AssertionChain.FailWith(String message, Object[] args)
+   at FluentAssertions.Primitives.EnumAssertions`2.Be(TEnum expected, String because, Object[] becauseArgs)
+   at ShahdCooperative.NotificationService.IntegrationTests.Controllers.UserPreferencesControllerIntegrationTests.CreateUserPreferences_WithValidData_ReturnsCreated() in C:\Users\Predator\ShahdCooperativeProject\ShahdCooperative.NotificationService\ShahdCooperative.NotificationService.IntegrationTests\Controllers\UserPreferencesControllerIntegrationTests.cs:line 50
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     8, Passed:    23, Skipped:     0, Total:    31, Duration: 14 s - ShahdCooperative.NotificationService.IntegrationTests.dll (net9.0)

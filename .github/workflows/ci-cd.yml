@@ -29,10 +29,11 @@ jobs:
         ports:
           - 1433:1433
         options: >-
-          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -C -Q 'SELECT 1'"
+          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q 'SELECT 1' || exit 1"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 10
+          --health-start-period 10s
 
     steps:
     - uses: actions/checkout@v4
@@ -41,6 +42,20 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '9.0.x'
+
+    - name: Verify SQL Server Connection
+      run: |
+        echo "Waiting for SQL Server to be ready..."
+        for i in {1..30}; do
+          if docker exec $(docker ps -q -f ancestor=mcr.microsoft.com/mssql/server:2022-latest) /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q "SELECT 1" > /dev/null 2>&1; then
+            echo "SQL Server is ready!"
+            exit 0
+          fi
+          echo "Attempt $i: SQL Server not ready yet, waiting..."
+          sleep 2
+        done
+        echo "SQL Server failed to become ready"
+        exit 1
 
     - name: Restore dependencies
       run: dotnet restore
