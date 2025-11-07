@@ -27,7 +27,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
         if (_isCI)
         {
             // GitHub Actions - use service container
-            _connectionString = $"Server=localhost,1433;Database={_databaseName};User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;Connection Timeout=30";
+            _connectionString = $"Server=localhost,1433;Database={_databaseName};User Id=sa;Password=Your_password123;TrustServerCertificate=true;Connection Timeout=30";
             Console.WriteLine("[CI] Using GitHub Actions service container");
         }
         else
@@ -96,7 +96,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
         if (_isCI)
         {
             // GitHub Actions service container
-            return "Server=localhost,1433;Database=master;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;Connection Timeout=30";
+            return "Server=localhost,1433;Database=master;User Id=sa;Password=Your_password123;TrustServerCertificate=true;Connection Timeout=30";
         }
         else
         {
