@@ -31,60 +31,60 @@ jobs:
       run: |
         Write-Host "Setting up SQL Server for tests..."
 
-        # List all SQL Server services
-        Write-Host "Available SQL Server services:"
+        # List all services
+        Write-Host "`n=== All SQL-related services ==="
         Get-Service -Name "*SQL*" | Format-Table -AutoSize
 
-        # Find and start SQL Server service
-        $sqlService = Get-Service -Name "MSSQL*" -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "MSSQL*" } | Select-Object -First 1
+        # Check if sqlcmd is available
+        Write-Host "`n=== Checking sqlcmd ==="
+        Get-Command sqlcmd -ErrorAction SilentlyContinue | Format-List
 
-        if ($sqlService) {
-            Write-Host "Found SQL Server service: $($sqlService.Name)"
-            Write-Host "Current status: $($sqlService.Status)"
+        # Try to query using sqlcmd with different server names
+        $serverNames = @("localhost", "(local)", "localhost\SQL2019", "(local)\SQL2019")
 
-            if ($sqlService.Status -ne "Running") {
-                Write-Host "Starting SQL Server service..."
-                Start-Service $sqlService.Name
-                Start-Sleep -Seconds 10
-                $sqlService.Refresh()
-                Write-Host "Service status after start: $($sqlService.Status)"
-            } else {
-                Write-Host "SQL Server is already running"
-            }
-        } else {
-            Write-Host "No SQL Server service found, trying to use SQL Server 2019 Express..."
-        }
-
-        # Try multiple connection string formats
-        $connectionStrings = @(
-            "Server=localhost;Database=master;Integrated Security=true;TrustServerCertificate=true;Connection Timeout=30;",
-            "Server=(local);Database=master;Integrated Security=true;TrustServerCertificate=true;Connection Timeout=30;",
-            "Server=.\SQL2019;Database=master;Integrated Security=true;TrustServerCertificate=true;Connection Timeout=30;",
-            "Server=localhost\SQL2019;Database=master;Integrated Security=true;TrustServerCertificate=true;Connection Timeout=30;"
-        )
-
-        $connected = $false
-        foreach ($connStr in $connectionStrings) {
-            Write-Host "`nTrying connection string: $connStr"
+        $workingServer = $null
+        foreach ($server in $serverNames) {
+            Write-Host "`n=== Testing server: $server ==="
             try {
-                $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
-                $connection.Open()
-                Write-Host "✓ Successfully connected to SQL Server!"
-                $env:TEST_CONNECTION_STRING = $connStr
-                Write-Host "Using connection string: $connStr"
-                $connection.Close()
-                $connected = $true
-                break
+                $result = & sqlcmd -S $server -Q "SELECT @@VERSION" -b 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host "✓ Successfully connected to: $server"
+                    Write-Host $result
+                    $workingServer = $server
+                    break
+                } else {
+                    Write-Host "✗ Failed to connect to: $server"
+                    Write-Host $result
+                }
             } catch {
-                Write-Host "✗ Failed: $_"
+                Write-Host "✗ Error connecting to ${server}: $_"
             }
         }
 
-        if (-not $connected) {
-            throw "Failed to connect to SQL Server with any connection string"
+        if (-not $workingServer) {
+            Write-Host "`n=== SQL Server not found, checking LocalDB ==="
+
+            # List LocalDB instances
+            sqllocaldb info
+
+            # Try to create and start LocalDB
+            Write-Host "`nCreating LocalDB instance..."
+            sqllocaldb create MSSQLLocalDB -s
+            sqllocaldb info MSSQLLocalDB
+
+            # Test LocalDB connection
+            $result = & sqlcmd -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION" -b 2>&1
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "✓ LocalDB is working!"
+                Write-Host $result
+                $workingServer = "(localdb)\MSSQLLocalDB"
+            } else {
+                throw "Failed to connect to SQL Server or LocalDB"
+            }
         }
 
-        Write-Host "`nSQL Server is ready!"
+        Write-Host "`n=== SQL Server is ready! ==="
+        Write-Host "Using server: $workingServer"
       shell: pwsh
 
     - name: Set SQL Server connection environment variable

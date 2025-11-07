@@ -38,13 +38,14 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
 
     private static string GetWorkingConnectionString(string databaseName)
     {
-        // Try different SQL Server instance names commonly used in GitHub Actions
+        // Try different SQL Server instance names commonly used in GitHub Actions, plus LocalDB
         var connectionFormats = new[]
         {
             $"Server=localhost\\SQL2019;Database={databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30",
             $"Server=(local)\\SQL2019;Database={databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30",
             $"Server=localhost;Database={databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30",
-            $"Server=(local);Database={databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30"
+            $"Server=(local);Database={databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30",
+            $"Server=(localdb)\\MSSQLLocalDB;Database={databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30"
         };
 
         // For the master database connection check
@@ -56,18 +57,18 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
                 using var connection = new SqlConnection(masterConnStr);
                 connection.Open();
                 connection.Close();
-                Console.WriteLine($"[CI] Using SQL Server connection: {connStr}");
+                Console.WriteLine($"[CI] Using connection: {connStr}");
                 return connStr;
             }
-            catch
+            catch (Exception ex)
             {
-                // Try next connection string
+                Console.WriteLine($"[CI] Failed to connect with: {connStr.Substring(0, Math.Min(50, connStr.Length))}... Error: {ex.Message}");
             }
         }
 
-        // Default fallback
-        Console.WriteLine($"[CI] Could not verify connection, using default: localhost\\SQL2019");
-        return $"Server=localhost\\SQL2019;Database={databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30";
+        // Default fallback to LocalDB
+        Console.WriteLine($"[CI] Could not verify any connection, using fallback: LocalDB");
+        return $"Server=(localdb)\\MSSQLLocalDB;Database={databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30";
     }
 
     async Task IAsyncLifetime.InitializeAsync()
