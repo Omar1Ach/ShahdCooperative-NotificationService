@@ -21,17 +21,16 @@ jobs:
 
     services:
       sqlserver:
-        image: mcr.microsoft.com/mssql/server:2022-latest
+        image: mcr.microsoft.com/mssql/server:2019-latest
         env:
           ACCEPT_EULA: Y
           SA_PASSWORD: YourStrong@Passw0rd
-          MSSQL_PID: Developer
         ports:
           - 1433:1433
         options: >-
-          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q 'SELECT 1' || exit 1"
+          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourStrong@Passw0rd' -Q 'SELECT 1' -b -o /dev/null"
           --health-interval 10s
-          --health-timeout 5s
+          --health-timeout 3s
           --health-retries 10
           --health-start-period 10s
 
@@ -47,14 +46,17 @@ jobs:
       run: |
         echo "Waiting for SQL Server to be ready..."
         for i in {1..30}; do
-          if docker exec $(docker ps -q -f ancestor=mcr.microsoft.com/mssql/server:2022-latest) /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q "SELECT 1" > /dev/null 2>&1; then
+          if docker exec $(docker ps -q -f ancestor=mcr.microsoft.com/mssql/server:2019-latest) /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourStrong@Passw0rd' -Q "SELECT 1" -b > /dev/null 2>&1; then
             echo "SQL Server is ready!"
+            docker exec $(docker ps -q -f ancestor=mcr.microsoft.com/mssql/server:2019-latest) /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourStrong@Passw0rd' -Q "SELECT @@VERSION"
             exit 0
           fi
           echo "Attempt $i: SQL Server not ready yet, waiting..."
           sleep 2
         done
         echo "SQL Server failed to become ready"
+        docker ps -a
+        docker logs $(docker ps -aq -f ancestor=mcr.microsoft.com/mssql/server:2019-latest)
         exit 1
 
     - name: Restore dependencies
