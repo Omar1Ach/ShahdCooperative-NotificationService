@@ -27,41 +27,50 @@ jobs:
       with:
         dotnet-version: '9.0.x'
 
-    - name: Initialize SQL Server LocalDB
+    - name: Initialize SQL Server
       run: |
-        Write-Host "Initializing LocalDB..."
+        Write-Host "Setting up SQL Server for tests..."
 
-        # Create and start a fresh LocalDB instance
-        sqllocaldb stop MSSQLLocalDB -ErrorAction SilentlyContinue
-        sqllocaldb delete MSSQLLocalDB -ErrorAction SilentlyContinue
-        sqllocaldb create MSSQLLocalDB -s
+        # GitHub Actions has SQL Server 2019 pre-installed
+        # Enable TCP/IP and start the service
+        $instanceName = "MSSQLSERVER"
 
-        # Wait for LocalDB to be fully ready
-        Start-Sleep -Seconds 5
+        # Get SQL Server services
+        Get-Service -Name "MSSQL*" | Format-Table -AutoSize
 
-        # Get instance info
-        sqllocaldb info MSSQLLocalDB
-
-        # Get the pipe name for the instance
-        $instanceInfo = sqllocaldb info MSSQLLocalDB
-        Write-Host "LocalDB Instance Info:"
-        Write-Host $instanceInfo
-
-        # Test connection to master database
-        $connectionString = "Server=(localdb)\MSSQLLocalDB;Database=master;Integrated Security=true;Connection Timeout=30;"
+        # Test connection to SQL Server Express
+        $connectionString = "Server=localhost;Database=master;Integrated Security=true;TrustServerCertificate=true;Connection Timeout=30;"
         Write-Host "Testing connection with: $connectionString"
 
-        try {
-            $connection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
-            $connection.Open()
-            Write-Host "✓ Successfully connected to LocalDB!"
-            $connection.Close()
-        } catch {
-            Write-Host "✗ Failed to connect to LocalDB: $_"
-            throw
+        $maxAttempts = 5
+        $attempt = 0
+        $connected = $false
+
+        while (-not $connected -and $attempt -lt $maxAttempts) {
+            $attempt++
+            Write-Host "Connection attempt $attempt of $maxAttempts..."
+            try {
+                $connection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
+                $connection.Open()
+                Write-Host "✓ Successfully connected to SQL Server!"
+                $connection.Close()
+                $connected = $true
+            } catch {
+                Write-Host "✗ Connection attempt $attempt failed: $_"
+                if ($attempt -lt $maxAttempts) {
+                    Write-Host "Waiting 5 seconds before retry..."
+                    Start-Sleep -Seconds 5
+                } else {
+                    throw "Failed to connect to SQL Server after $maxAttempts attempts"
+                }
+            }
         }
 
-        Write-Host "LocalDB is ready!"
+        Write-Host "SQL Server is ready!"
+      shell: pwsh
+
+    - name: Set SQL Server connection environment variable
+      run: echo "USE_SQLSERVER_FOR_TESTS=true" >> $env:GITHUB_ENV
       shell: pwsh
 
     - name: Restore dependencies

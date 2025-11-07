@@ -20,8 +20,19 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
     public CustomWebApplicationFactory()
     {
         // Set connection string in constructor so it's available during ConfigureWebHost
-        // Using MSSQLLocalDB (with proper casing) to match the LocalDB instance name
-        _connectionString = $"Server=(localdb)\\MSSQLLocalDB;Database={_databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=True;Connection Timeout=30";
+        // Check if running in CI/CD environment (GitHub Actions uses SQL Server instead of LocalDB)
+        var useSqlServer = Environment.GetEnvironmentVariable("USE_SQLSERVER_FOR_TESTS");
+
+        if (!string.IsNullOrEmpty(useSqlServer) && useSqlServer.Equals("true", StringComparison.OrdinalIgnoreCase))
+        {
+            // GitHub Actions CI/CD - use SQL Server
+            _connectionString = $"Server=localhost;Database={_databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30";
+        }
+        else
+        {
+            // Local development - use LocalDB
+            _connectionString = $"Server=(localdb)\\MSSQLLocalDB;Database={_databaseName};Integrated Security=true;MultipleActiveResultSets=true;TrustServerCertificate=true;Connection Timeout=30";
+        }
     }
 
     async Task IAsyncLifetime.InitializeAsync()
@@ -45,7 +56,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
 
     private async Task CreateDatabaseAsync()
     {
-        var masterConnectionString = "Server=(localdb)\\MSSQLLocalDB;Database=master;Integrated Security=true;TrustServerCertificate=True;Connection Timeout=30";
+        var masterConnectionString = GetMasterConnectionString();
         await using var connection = new SqlConnection(masterConnectionString);
         await connection.OpenAsync();
 
@@ -58,7 +69,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
     {
         try
         {
-            var masterConnectionString = "Server=(localdb)\\MSSQLLocalDB;Database=master;Integrated Security=true;TrustServerCertificate=True;Connection Timeout=30";
+            var masterConnectionString = GetMasterConnectionString();
             await using var connection = new SqlConnection(masterConnectionString);
             await connection.OpenAsync();
 
@@ -74,6 +85,22 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
         catch
         {
             // Ignore cleanup errors
+        }
+    }
+
+    private string GetMasterConnectionString()
+    {
+        var useSqlServer = Environment.GetEnvironmentVariable("USE_SQLSERVER_FOR_TESTS");
+
+        if (!string.IsNullOrEmpty(useSqlServer) && useSqlServer.Equals("true", StringComparison.OrdinalIgnoreCase))
+        {
+            // GitHub Actions CI/CD - use SQL Server
+            return "Server=localhost;Database=master;Integrated Security=true;TrustServerCertificate=true;Connection Timeout=30";
+        }
+        else
+        {
+            // Local development - use LocalDB
+            return "Server=(localdb)\\MSSQLLocalDB;Database=master;Integrated Security=true;TrustServerCertificate=true;Connection Timeout=30";
         }
     }
 
